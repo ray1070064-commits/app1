@@ -1,27 +1,32 @@
 # 資本人生｜Public Frontend
 
-`app1` 是「資本人生」未來公開網站的前端專案。正式前端開發分支使用 `main`。
+`app1` 是「資本人生」公開網站前端，正式開發分支為 `main`。
 
 ## Repository 定位
 
-- `ray1070064-commits/app1`：公開前端，只放 React / HTML / CSS / 圖片 / API 呼叫。
-- `ray1070064-commits/app`：私有核心，保留 Python 遊戲邏輯、市場模擬、事件機率、交易驗證、存檔驗證與未來 FastAPI 後端。
+- `ray1070064-commits/app1`：Public，只放 React / HTML / CSS / 圖片 / API 呼叫與公開 mock。
+- `ray1070064-commits/app`：Private，保存 Python 遊戲邏輯、市場模擬、事件機率、交易驗證與 FastAPI 後端。
 
-**不要把 Python 核心公式、私密金鑰、資料庫密碼或伺服器 Secrets 放進 app1。**
+**禁止把 Python 核心公式、API Key、Token、資料庫密碼或伺服器 Secrets 放進 app1。**
 
-## 第一階段已建立
+## 已完成前端
 
-- React + Vite 前端骨架
-- 正式開局首頁
-  - 隨機開始
-  - 開局設定
-  - 新手教學開關
+- React + Vite 開局首頁
 - 三欄市場終端
-  - 左：市場 / Watchlist
-  - 中：價格圖表 / 新聞
-  - 右：下單 / 持倉
+- K 線、成交量、MA / RSI / MACD
+- 技術指標自訂參數，預設與私有引擎一致：MA 20 / 50 / 200、RSI 14、MACD 12 / 26 / 9
+- 搜尋與市場類別篩選
+- Spot / Long / Short
+- 市價 / 限價、槓桿、持倉、部分 / 全部平倉、未成交掛單
+- 股票資訊層：
+  - 公司概況與財務卡片
+  - 配息 / 收益資訊
+  - ETF 成分與費用率
+  - 分級新聞
+  - PTT 模擬聊天室
+  - 市場深度 / spread / 買賣失衡
 - API Adapter：`src/api/client.js`
-- 無後端時可使用 mock 資料開發 UI
+- 無後端時可用公開 mock 開發 UI；mock 不包含私有市場公式。
 
 ## 本機啟動
 
@@ -36,30 +41,31 @@ npm run dev
 npm run build
 ```
 
-產物會輸出到 `dist/`。
-
 ## API 設定
 
-複製 `.env.example` 為 `.env.local`：
+`.env.local`：
 
 ```env
-VITE_API_BASE_URL=https://api.example.com
+VITE_API_BASE_URL=https://your-private-backend.example.com
 VITE_USE_MOCKS=false
 ```
 
-目前預定 API 路徑：
+### 市場 / 資訊 API contract
 
 - `POST /api/v1/games`
 - `GET /api/v1/market/snapshot`
+- `GET /api/v1/market/{symbol}/history?timeframe=3M`
+- `GET /api/v1/assets/{symbol}`
+- `GET /api/v1/assets/{symbol}/news`
+- `GET /api/v1/assets/{symbol}/ptt?nonce=0`
+- `GET /api/v1/assets/{symbol}/depth`
 - `POST /api/v1/orders`
+- `DELETE /api/v1/orders/{order_id}`
+- `POST /api/v1/positions/{position_id}/close`
 - `POST /api/v1/time/advance`
 
-正式上線後，所有真正會影響遊戲結果的計算都必須由私有後端完成；前端只負責顯示與傳送玩家操作。
+正式成交、槓桿、清算、配息、事件、價格與資產變更都必須由 Private 後端重新驗證；前端不具有最終決定權。
 
-## 公開前檢查
+## GitHub Pages
 
-1. 確認 repo 裡沒有 `.env`、API Key、Token、資料庫連線字串。
-2. 確認前端沒有複製 Python 市場公式或事件機率。
-3. 後端啟用 CORS 白名單，只允許正式網站來源。
-4. 交易、資產、時間推進、排行榜等操作全部由後端再次驗證。
-5. 完成正式 API 後再將 `VITE_USE_MOCKS` 關閉。
+Vite 已設定 `/app1/` base path，並提供 GitHub Pages Actions workflow。若尚未啟用 Pages，請到 `Settings → Pages → Source → GitHub Actions` 啟用一次。
