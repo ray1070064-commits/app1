@@ -7,6 +7,7 @@ const initialState = {
     orderQuantity: 1,
     legacy: null,
     chart: null,
+    startup: null,
   },
   server: null,
   connected: false,
@@ -38,6 +39,11 @@ export function setServerState(serverState) {
   if (!state.ui.selectedSymbol && serverState?.market?.selected_symbol) {
     state.ui.selectedSymbol = serverState.market.selected_symbol;
   }
+  emit();
+}
+
+export function setStartup(payload) {
+  state.ui.startup = payload || null;
   emit();
 }
 
