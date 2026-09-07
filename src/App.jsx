@@ -39,6 +39,10 @@ function LaunchScreen({ onStart }) {
   const [error, setError] = useState('')
 
   async function begin(payload) {
+    if (browserMeta && typeof window !== 'undefined') {
+      const proceed = window.confirm('目前瀏覽器已有一段人生。開始新人生後，之後的自動保存會覆蓋原存檔。確定繼續？')
+      if (!proceed) return
+    }
     setBusy(true); setError('')
     try {
       const result = await createGame(payload)
