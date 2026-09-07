@@ -161,6 +161,25 @@ export async function powerRiskAction(action, payload = {}) { return request('/a
 export async function getLife() { return request('/api/v1/life') }
 export async function lifeAction(action, payload = {}) { return request('/api/v1/life/action', { method: 'POST', body: JSON.stringify({ action, payload }) }) }
 
+export async function getFeatureState() {
+  if (USE_MOCKS) {
+    return {
+      ok: true,
+      marketTools: { dcaPlans: {}, protectiveOrders: {} },
+      property: { houses: [], vehicles: [], dailyUpkeep: 0 },
+      health: { health: 100, stress: 20, activeIllnesses: [], checkupBuffDays: 0, autoMedical: false, autoHealthThreshold: 45, autoStressThreshold: 82, autoMedicalSpent: 0 },
+      progress: { xp: 0, level: 1, title: '人生新手', selectedTitle: 'life_rookie', achievements: [], titles: [], challenge: null, challengeHistory: [], retirement: null },
+      account: { cash: mockMarket.account?.cash || 100000, equity: mockMarket.account?.equity || 100000 },
+    }
+  }
+  return request('/api/v1/features')
+}
+
+export async function featureAction(action, payload = {}) {
+  if (USE_MOCKS) return { ok: true, message: 'Mock 模式僅預覽介面', features: await getFeatureState() }
+  return request('/api/v1/features/action', { method: 'POST', body: JSON.stringify({ action, payload }) })
+}
+
 export async function exportSave() {
   if (USE_MOCKS) throw new Error('Mock 模式不提供正式存檔')
   return request('/api/v1/save/export')
