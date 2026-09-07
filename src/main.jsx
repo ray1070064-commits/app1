@@ -5,6 +5,7 @@ import './styles.css'
 import './market.css'
 import './info.css'
 import './life.css'
+import './feature.css'
 
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>
