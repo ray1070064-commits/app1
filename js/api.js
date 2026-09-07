@@ -1,5 +1,9 @@
 import { CONFIG, hasBackendConfig } from './config.js';
 
+const SESSION_KEY = 'capital-life-api-session-v1';
+let sessionToken = sessionStorage.getItem(SESSION_KEY) || '';
+let sessionPromise = null;
+
 export class ApiError extends Error {
   constructor(message, status = 0, payload = null) {
     super(message);
@@ -14,10 +18,57 @@ function buildUrl(path) {
   return `${base}${CONFIG.API_PREFIX}${path}`;
 }
 
-async function request(path, options = {}) {
-  if (!hasBackendConfig()) {
-    throw new ApiError('尚未設定遊戲後端。');
+function authHeaders(extra = {}) {
+  return {
+    ...(sessionToken ? { Authorization: `Bearer ${sessionToken}` } : {}),
+    ...extra,
+  };
+}
+
+async function parseResponse(response) {
+  const contentType = response.headers.get('content-type') || '';
+  if (contentType.includes('application/json')) return response.json();
+  return null;
+}
+
+export function clearSession() {
+  sessionToken = '';
+  sessionStorage.removeItem(SESSION_KEY);
+}
+
+export async function ensureSession(force = false) {
+  if (!hasBackendConfig()) throw new ApiError('尚未設定遊戲後端。');
+  if (!force && sessionToken) return sessionToken;
+  if (!force && sessionPromise) return sessionPromise;
+
+  sessionPromise = (async () => {
+    const response = await fetch(buildUrl('/session'), {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      cache: 'no-store',
+    });
+    const payload = await parseResponse(response);
+    if (!response.ok) {
+      throw new ApiError(payload?.detail || payload?.message || `無法建立遊戲 Session (${response.status})`, response.status, payload);
+    }
+    const token = String(payload?.session_token || '');
+    if (!token) throw new ApiError('後端沒有回傳遊戲 Session。');
+    sessionToken = token;
+    sessionStorage.setItem(SESSION_KEY, token);
+    return token;
+  })();
+
+  try {
+    return await sessionPromise;
+  } finally {
+    sessionPromise = null;
   }
+}
+
+async function request(path, options = {}, retryAuth = true) {
+  if (!hasBackendConfig()) throw new ApiError('尚未設定遊戲後端。');
+  if (path !== '/session') await ensureSession(false);
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), CONFIG.REQUEST_TIMEOUT_MS);
@@ -25,47 +76,54 @@ async function request(path, options = {}) {
   try {
     const response = await fetch(buildUrl(path), {
       credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(options.headers || {}),
-      },
-      signal: controller.signal,
+      cache: 'no-store',
       ...options,
+      headers: authHeaders({
+        ...(options.body != null ? { 'Content-Type': 'application/json' } : {}),
+        ...(options.headers || {}),
+      }),
+      signal: controller.signal,
     });
 
-    let payload = null;
-    const contentType = response.headers.get('content-type') || '';
-    if (contentType.includes('application/json')) {
-      payload = await response.json();
+    const payload = await parseResponse(response);
+    if (response.status === 401 && retryAuth) {
+      clearSession();
+      await ensureSession(true);
+      return request(path, options, false);
     }
-
     if (!response.ok) {
       const message = payload?.detail || payload?.message || `請求失敗 (${response.status})`;
       throw new ApiError(message, response.status, payload);
     }
-
     return payload;
   } catch (error) {
-    if (error?.name === 'AbortError') {
-      throw new ApiError('連線逾時，請稍後再試。');
-    }
+    if (error?.name === 'AbortError') throw new ApiError('連線逾時，請稍後再試。');
     throw error;
   } finally {
     clearTimeout(timer);
   }
 }
 
-export async function loadGameState() {
-  return request('/state', { method: 'GET' });
+export async function loadGameState(includeUi = false) {
+  return request(`/state?include_ui=${includeUi ? 'true' : 'false'}`, { method: 'GET' });
 }
 
-export async function sendGameAction(action, payload = {}) {
+export async function loadLegacyUi() {
+  return request('/ui', { method: 'GET' });
+}
+
+export async function loadChart(symbol, limit = 365) {
+  return request(`/chart/${encodeURIComponent(symbol)}?limit=${encodeURIComponent(limit)}`, { method: 'GET' });
+}
+
+export async function sendGameAction(action, payload = {}, options = {}) {
   return request('/action', {
     method: 'POST',
     body: JSON.stringify({
       action,
       payload,
       action_id: crypto.randomUUID(),
+      include_ui: Boolean(options.includeUi),
     }),
   });
 }
@@ -85,7 +143,7 @@ export async function healthCheck() {
   if (!hasBackendConfig()) return false;
   try {
     const response = await fetch(`${CONFIG.API_BASE_URL.replace(/\/$/, '')}/health`, {
-      credentials: 'include',
+      credentials: 'omit',
       cache: 'no-store',
     });
     return response.ok;
