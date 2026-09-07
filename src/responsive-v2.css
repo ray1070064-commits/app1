@@ -22,10 +22,20 @@ body:has(.terminal-shell) #root {
   margin-inline: auto;
 }
 
+/* Keep the mode switch in normal document flow. Sticky/fixed navigation was
+   covering content while scrolling on high-DPI desktop displays. */
 .game-mode-dock {
+  position: relative;
+  inset: auto;
+  transform: none;
+  width: max-content;
   max-width: calc(100vw - 16px);
-  margin-bottom: 6px;
+  margin: 6px auto 10px;
+  z-index: 20;
+  overflow-x: auto;
+  scrollbar-width: none;
 }
+.game-mode-dock::-webkit-scrollbar { display: none; }
 
 .terminal-topbar {
   gap: 7px 10px;
@@ -204,47 +214,145 @@ body:has(.terminal-shell) #root {
 .parity-power-dock { right: 10px; width: 230px; }
 .parity-power-dock.open { width: min(350px, calc(100vw - 20px)); }
 
-/* ---------- High-DPI desktop: 1728px physical often ~= 1152 CSS px ---------- */
-@media (min-width: 1061px) and (max-width: 1280px) {
-  .terminal-shell,
-  .feature-shell,
-  .life-shell { width: calc(100% - 10px); }
-
+/* ---------- Critical legacy-breakpoint reset ----------
+   market.css used to move .trade-panel to grid-column:1/-1 at <=1280px.
+   On Windows 150-160% display scaling, a 2K monitor reports ~1280 CSS px,
+   so that old rule made the entire order form span the page and look exploded.
+   Force the real 3-column terminal on desktop/high-DPI viewports. ---------- */
+@media (min-width: 901px) {
   .terminal-grid-full {
-    grid-template-columns: minmax(155px, .62fr) minmax(0, 2.5fr) minmax(225px, .96fr);
+    display: grid;
+    grid-template-columns: minmax(150px, .62fr) minmax(0, 2.55fr) minmax(220px, .95fr);
     gap: 7px;
+    align-items: start;
   }
 
-  .watch-row { min-height: 48px; }
-  .watch-row .ticker-cell small { max-width: 92px; }
-  .panel-title { min-height: 44px; }
-  .order-form { padding-inline: 8px; }
+  .watch-panel,
+  .trade-panel {
+    position: sticky;
+    top: 8px;
+    max-height: calc(100dvh - 16px);
+  }
 
-  .life-layout { grid-template-columns: 150px minmax(0, 1fr); }
-  .feature-layout { grid-template-columns: 145px minmax(0, 1fr); }
+  .trade-panel {
+    grid-column: auto;
+    display: block;
+    overflow-y: auto;
+  }
+
+  .order-form {
+    display: block;
+    padding: 8px 8px 12px;
+  }
+
+  .mode-tabs,
+  .order-type-switch,
+  .risk-note,
+  .order-form .order-button,
+  .order-form .order-notice,
+  .market-tools-block,
+  .trade-panel .panel-title,
+  .trade-panel .positions-section {
+    grid-column: auto;
+  }
+
+  .side-switch.compact,
+  .leverage-block { margin-top: 8px; }
+
+  /* Keep side navigation on desktop even if Windows scaling lowers CSS width. */
+  .life-layout {
+    grid-template-columns: 145px minmax(0, 1fr);
+  }
+  .feature-layout {
+    grid-template-columns: 140px minmax(0, 1fr);
+  }
+
+  .life-nav,
+  .feature-nav {
+    position: sticky;
+    display: grid;
+    overflow: visible;
+    white-space: normal;
+  }
+  .life-nav { top: 8px; }
+  .feature-nav { top: 8px; }
   .life-nav button,
-  .feature-nav button { padding-inline: 8px; }
+  .feature-nav button { min-width: 0; text-align: left; }
+}
+
+/* ---------- High-DPI desktop: 1728px physical often ~= 1152 CSS px ---------- */
+@media (min-width: 901px) and (max-width: 1280px) {
+  .terminal-shell,
+  .feature-shell,
+  .life-shell { width: calc(100% - 8px); }
+
+  .terminal-grid-full {
+    grid-template-columns: minmax(142px, .58fr) minmax(0, 2.45fr) minmax(214px, .94fr);
+    gap: 6px;
+  }
+
+  .watch-row { min-height: 46px; padding: 7px 7px; }
+  .watch-row .ticker-cell small { max-width: 84px; }
+  .watch-controls { padding: 7px 7px 5px; }
+  .category-filter button { font-size: .64rem; padding: 4px 2px; }
+  .panel-title { min-height: 42px; padding-inline: 10px; }
+  .asset-header { padding: 13px 14px 3px; }
+  .asset-header h2 { font-size: 1.05rem; }
+  .asset-quote strong { font-size: 1.3rem; }
+
+  .mode-tabs button { padding: 7px 3px; }
+  .order-type-switch button { padding: 6px 4px; }
+  .order-preview-grid { gap: 4px; }
+  .order-preview-grid > div { padding: 7px; }
+  .market-tool-card { padding: 7px; }
+
+  .life-layout { grid-template-columns: 138px minmax(0, 1fr); }
+  .feature-layout { grid-template-columns: 134px minmax(0, 1fr); }
+  .life-nav button,
+  .feature-nav button { padding: 8px 7px; font-size: .78rem; }
 
   .life-card,
-  .feature-card { padding: 12px; }
+  .feature-card { padding: 11px; }
   .life-metric,
-  .feature-metric { padding: 11px; }
+  .feature-metric { padding: 10px; }
 
-  .deep-grid-3 { grid-template-columns: repeat(auto-fit, minmax(155px, 1fr)); }
+  .life-metric-grid,
+  .life-metric-grid.compact,
+  .feature-metric-grid { grid-template-columns: repeat(auto-fit, minmax(132px, 1fr)); }
+  .deep-grid-3 { grid-template-columns: repeat(auto-fit, minmax(145px, 1fr)); }
   .deep-grid-4,
   .deep-family-profile,
-  .deep-check-grid { grid-template-columns: repeat(auto-fit, minmax(135px, 1fr)); }
+  .deep-check-grid { grid-template-columns: repeat(auto-fit, minmax(125px, 1fr)); }
+  .deep-settings-grid { grid-template-columns: repeat(auto-fit, minmax(155px, 1fr)); }
   .deep-child-grid,
   .deep-story-grid,
-  .deep-progress-pair { grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
+  .deep-progress-pair,
+  .deep-two-column { grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
+  .skill-grid,
+  .choice-grid { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+  .form-grid.two { grid-template-columns: repeat(auto-fit, minmax(185px, 1fr)); }
 
-  .tutorial-coach { width: min(310px, calc(100vw - 20px)); }
+  .feature-asset-grid { grid-template-columns: repeat(auto-fit, minmax(185px, 1fr)); }
+  .feature-badge-grid,
+  .feature-title-grid { grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); }
+  .feature-auto-grid { grid-template-columns: repeat(auto-fit, minmax(155px, 1fr)); }
+
+  .tutorial-coach { width: min(300px, calc(100vw - 20px)); }
 }
 
 /* ---------- Tablet / narrow desktop ---------- */
-@media (max-width: 1060px) {
+@media (max-width: 900px) {
   .launch-hero { padding: 26px 28px; }
   .launch-hero h1 { font-size: clamp(2.4rem, 7vw, 4.4rem); }
+
+  .terminal-grid-full { display: block; }
+  .watch-panel,
+  .trade-panel { position: static; max-height: none; }
+  .watch-list { display: flex; overflow-x: auto; overflow-y: hidden; }
+  .watch-row { min-width: 150px; }
+  .category-filter { display: flex; overflow-x: auto; }
+  .trade-panel { margin-top: 8px; }
+  .order-form { display: block; }
 
   .life-layout,
   .feature-layout { grid-template-columns: 1fr; }
