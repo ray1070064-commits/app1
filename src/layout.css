@@ -1,0 +1,320 @@
+/* Unified responsive layout polish.
+   Loaded last so the original feature styles stay intact while the overall
+   shell, navigation and dense cards remain readable at every viewport size. */
+
+body:has(.terminal-shell) {
+  overflow-x: hidden;
+}
+
+.terminal-shell {
+  padding-bottom: 96px;
+}
+
+.terminal-topbar {
+  flex-wrap: wrap;
+  align-items: center;
+  row-gap: 8px;
+}
+
+.terminal-topbar > .brand-inline,
+.terminal-topbar > .mode-switch,
+.terminal-topbar > .advance-controls,
+.terminal-topbar > .ghost-button {
+  flex: 0 0 auto;
+}
+
+.terminal-topbar > .top-stats {
+  flex: 1 1 440px;
+  min-width: 260px;
+}
+
+.advance-controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.advance-controls .ghost-button,
+.game-mode-dock .ghost-button {
+  white-space: nowrap;
+}
+
+/* The fixed global mode switch is authoritative.  Hiding duplicate switches
+   inside life/feature headers removes the crowded double-navigation look. */
+.life-topbar .mode-switch,
+.feature-topbar .mode-switch {
+  display: none;
+}
+
+.feature-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  padding: 8px 4px;
+  background: rgba(7, 11, 20, .92);
+  border-bottom: 1px solid rgba(145, 168, 225, .08);
+  backdrop-filter: blur(16px);
+}
+
+.feature-layout {
+  margin-top: 14px;
+}
+
+.feature-nav {
+  top: 72px;
+}
+
+.life-content,
+.feature-content,
+.workspace-column,
+.life-card,
+.feature-card,
+.feature-asset-card,
+.deep-child-card,
+.deep-story-card {
+  min-width: 0;
+}
+
+.life-card-title,
+.feature-card-title,
+.feature-asset-head,
+.deep-child-head,
+.deep-story-card > div {
+  flex-wrap: wrap;
+}
+
+.life-action-row,
+.feature-actions,
+.tool-actions,
+.close-actions {
+  flex-wrap: wrap;
+}
+
+.inline-form > *,
+.form-grid > *,
+.deep-settings-grid > *,
+.deep-control-row > *,
+.feature-auto-grid > *,
+.tool-grid > * {
+  min-width: 0;
+}
+
+.feature-asset-grid {
+  grid-template-columns: repeat(auto-fit, minmax(245px, 1fr));
+}
+
+.feature-badge-grid,
+.feature-title-grid {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.life-metric strong,
+.life-metric small,
+.feature-metric strong,
+.feature-metric small,
+.feature-badge span,
+.feature-title small,
+.record-row p,
+.deep-note,
+.deep-story-card p {
+  overflow-wrap: anywhere;
+}
+
+/* Bottom navigation: centered, never clipped, and scrollable on narrow screens. */
+.game-mode-dock {
+  left: 50%;
+  right: auto;
+  bottom: max(12px, env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  max-width: calc(100vw - 24px);
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scrollbar-width: none;
+  padding: 7px;
+}
+
+.game-mode-dock::-webkit-scrollbar {
+  display: none;
+}
+
+.game-mode-dock .ghost-button {
+  flex: 0 0 auto;
+  min-height: 38px;
+}
+
+.parity-power-dock {
+  bottom: 74px;
+}
+
+@media (max-width: 1450px) {
+  .terminal-topbar > .top-stats {
+    order: 5;
+    flex-basis: 100%;
+    justify-content: flex-start;
+  }
+
+  .terminal-topbar > .advance-controls {
+    margin-left: auto;
+  }
+}
+
+@media (max-width: 1050px) {
+  .life-layout,
+  .feature-layout {
+    gap: 10px;
+  }
+
+  .life-nav,
+  .feature-nav {
+    scrollbar-width: thin;
+    overscroll-behavior-inline: contain;
+  }
+
+  .feature-nav {
+    top: auto;
+  }
+
+  .deep-grid-3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .terminal-shell {
+    padding-bottom: 104px;
+  }
+
+  .terminal-topbar {
+    align-items: flex-start;
+  }
+
+  .terminal-topbar > .brand-inline {
+    min-height: 38px;
+    align-items: center;
+  }
+
+  .terminal-topbar > .advance-controls {
+    order: 6;
+    width: 100%;
+    margin-left: 0;
+    justify-content: flex-start;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+  }
+
+  .terminal-topbar > .advance-controls::-webkit-scrollbar {
+    display: none;
+  }
+
+  .terminal-topbar > .advance-controls .ghost-button {
+    flex: 0 0 auto;
+  }
+
+  .life-card,
+  .feature-card {
+    border-radius: 14px;
+  }
+
+  .parity-company-modal {
+    max-height: calc(100dvh - 28px);
+  }
+}
+
+@media (max-width: 760px) {
+  .terminal-shell {
+    width: min(100% - 12px, 1880px);
+  }
+
+  .terminal-topbar > .ghost-button {
+    margin-left: auto;
+  }
+
+  .life-metric-grid,
+  .life-metric-grid.compact,
+  .feature-metric-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .deep-grid-3,
+  .deep-grid-4,
+  .deep-family-profile,
+  .deep-settings-grid,
+  .deep-child-grid,
+  .deep-check-grid,
+  .deep-story-grid,
+  .deep-progress-pair {
+    grid-template-columns: 1fr;
+  }
+
+  .game-mode-dock {
+    left: 8px;
+    right: 8px;
+    bottom: max(8px, env(safe-area-inset-bottom));
+    transform: none;
+    width: auto;
+    max-width: none;
+    justify-content: flex-start;
+  }
+
+  .game-mode-dock .ghost-button {
+    flex: 1 0 auto;
+    text-align: center;
+  }
+
+  .parity-power-dock,
+  .parity-power-dock.open {
+    left: 8px;
+    right: 8px;
+    bottom: 66px;
+    width: auto;
+  }
+}
+
+@media (max-width: 560px) {
+  .terminal-shell {
+    padding-bottom: 112px;
+  }
+
+  .life-metric-grid,
+  .life-metric-grid.compact,
+  .feature-metric-grid,
+  .skill-grid,
+  .choice-grid,
+  .form-grid.two,
+  .tool-grid.two,
+  .tool-grid.three,
+  .feature-auto-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .life-card,
+  .feature-card,
+  .feature-asset-card {
+    padding: 12px;
+  }
+
+  .life-card-title,
+  .feature-card-title {
+    align-items: flex-start;
+  }
+
+  .life-action-row > .life-action,
+  .feature-actions.large > button {
+    flex: 1 1 100%;
+    width: 100%;
+  }
+
+  .game-mode-dock {
+    gap: 5px;
+    padding: 5px;
+  }
+
+  .game-mode-dock .ghost-button {
+    padding: 8px 10px;
+    font-size: .78rem;
+  }
+}
