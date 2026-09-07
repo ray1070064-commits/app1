@@ -1,0 +1,29 @@
+name: Rewrite public frontend history
+
+on:
+  push:
+    branches: [mirror-import-bootstrap]
+    paths:
+      - 'tools/rewrite_public_history.trigger'
+
+permissions:
+  contents: write
+
+jobs:
+  rewrite:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Create clean orphan frontend history
+        run: |
+          git checkout --orphan sanitized-public
+          git rm -rf --cached . || true
+          rm -f app-main.tar.xz.b64 app-main.bundle mirror_manifest.txt
+          rm -rf mirror_parts
+          git add -A
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "feat: establish public frontend-only repository"
+          git push --force origin HEAD:mirror-import-bootstrap

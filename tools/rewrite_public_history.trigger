@@ -1,0 +1,1 @@
+rewrite public frontend history
