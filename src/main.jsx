@@ -11,6 +11,7 @@ import './tutorial.css'
 import './settlement.css'
 import './parity.css'
 import './layout.css'
+import './responsive-v2.css'
 
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>
