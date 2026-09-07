@@ -1,5 +1,4 @@
 {
-  "version": 2,
   "rewrites": [
     { "source": "/(.*)", "destination": "https://app-lf18.onrender.com" }
   ]
