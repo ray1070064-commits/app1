@@ -244,6 +244,8 @@ export default function MarketTerminal({ player, onExit }) {
         <button type="button" className="ghost-button" disabled={busy} onClick={() => handleAdvance(1)}>+1 日</button>
         <button type="button" className="ghost-button" disabled={busy} onClick={() => handleAdvance(7)}>+7 日</button>
         <button type="button" className="ghost-button" disabled={busy} onClick={() => handleAdvance(30)}>+30 日</button>
+        <button type="button" className="ghost-button" disabled={busy} onClick={() => handleAdvance(182)}>+半年</button>
+        <button type="button" className="ghost-button" disabled={busy} onClick={() => handleAdvance(365)}>+1 年</button>
       </div>
       <button type="button" className="ghost-button" onClick={onExit}>主選單</button>
     </header>
@@ -275,7 +277,7 @@ export default function MarketTerminal({ player, onExit }) {
         <AssetInfoPanel info={assetInfo} loading={assetInfoLoading} onRefreshPtt={() => setPttNonce((value) => value + 1)} />
         <PortfolioPanel positions={positions} orders={orders} assets={assets} onClose={handleClose} onCancel={handleCancel} />
       </section>
-      <OrderPanel asset={selected} account={account} onSubmit={submitOrder} busy={busy} notice={notice} />
+      <OrderPanel asset={selected} account={account} positions={positions} onSubmit={submitOrder} busy={busy} notice={notice} />
     </section>
   </main>
 }
