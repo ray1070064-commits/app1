@@ -70,8 +70,8 @@ export function renderTrading(state) {
         <div class="panel-header">${escapeHtml(asset?.symbol || '尚未選擇標的')} ${escapeHtml(asset?.name || '')}</div>
         <div class="chart-box">
           <div class="chart-empty">
-            <strong>圖表區已預留</strong><br />
-            後端只需要回傳 OHLC / 價格序列；前端負責繪圖，不包含任何市場模擬公式。
+            <strong>圖表載入中</strong><br />
+            OHLC 價格資料由私有後端生成，公開前端只負責繪圖。
           </div>
         </div>
       </section>
@@ -82,7 +82,7 @@ export function renderTrading(state) {
           <div class="metric-grid">
             <div class="metric-card"><span>可用現金</span><strong>${escapeHtml(formatMoney(server.player?.cash))}</strong></div>
             <div class="metric-card"><span>目前價格</span><strong>${escapeHtml(formatMoney(asset?.price))}</strong></div>
-            <div class="metric-card"><span>持有數量</span><strong>${escapeHtml(position?.quantity ?? '—')}</strong></div>
+            <div class="metric-card"><span>持有數量</span><strong>${escapeHtml(position?.size ?? '—')}</strong></div>
             <div class="metric-card"><span>未實現損益</span><strong>${escapeHtml(formatMoney(position?.unrealized_pnl))}</strong></div>
           </div>
 
@@ -99,7 +99,7 @@ export function renderTrading(state) {
           </div>
           <div class="field">
             <label for="order-quantity">數量</label>
-            <input id="order-quantity" class="input" type="number" min="1" step="1" value="${escapeHtml(state.ui.orderQuantity)}" />
+            <input id="order-quantity" class="input" type="number" min="0.000001" step="any" value="${escapeHtml(state.ui.orderQuantity)}" />
           </div>
           <button class="button primary full" data-game-action="trade" ${disabledAttr(connected)}>送出委託</button>
         </div>
@@ -123,7 +123,7 @@ function renderActionCards(domain, title, subtitle, state) {
           </button>
         </article>
       `).join('')
-    : '<div class="empty-state panel">等待後端回傳目前可執行的行動清單。前端不自行判斷解鎖條件。</div>';
+    : '<div class="empty-state panel">這個區域仍在由完整功能相容層逐步轉成原生 Web UI；目前可先使用左側「完整功能」。</div>';
 
   return `
     ${pageHeader(title, subtitle)}
@@ -140,7 +140,7 @@ export function renderCompany(state) {
 }
 
 export function renderPolitics(state) {
-  return renderActionCards('politics', '政治法律', '前端只呈現合法可用的政治與法律操作。', state);
+  return renderActionCards('politics', '政治法律', '前端只呈現目前可以操作的政治與法律選項。', state);
 }
 
 export function renderNews(state) {
@@ -152,10 +152,10 @@ export function renderNews(state) {
       <div class="panel-body">
         ${items.length ? items.map(item => `
           <article class="feature-card" style="margin-bottom:10px;min-height:0">
-            <h3>${escapeHtml(item.title || '新聞')}</h3>
-            <p>${escapeHtml(item.summary || item.body || '')}</p>
+            <h3>${escapeHtml(item.title || item.headline || '新聞')}</h3>
+            <p>${escapeHtml(item.summary || item.body || item.text || '')}</p>
           </article>
-        `).join('') : '<div class="empty-state">等待後端提供新聞。</div>'}
+        `).join('') : '<div class="empty-state">目前沒有新聞。</div>'}
       </div>
     </section>
   `;
@@ -163,12 +163,13 @@ export function renderNews(state) {
 
 export function renderSave(state) {
   return `
-    ${pageHeader('存檔管理', '正式遊戲狀態應儲存在後端；LocalStorage 只建議保存 UI 偏好。')}
+    ${pageHeader('存檔管理', '完整 GameState 由私有後端封裝成不可讀、可驗證的加密存檔，再保存在這台瀏覽器。')}
     <section class="panel">
       <div class="panel-body">
+        <p class="muted">每次成功操作都會防抖自動存檔。LocalStorage 只保存後端產生的加密字串，不保存可直接修改的現金、Seed 或事件規則。</p>
         <div class="button-row">
-          <button class="button primary" data-game-action="save" ${disabledAttr(state.connected)}>儲存目前進度</button>
-          <button class="button" data-game-action="load_save" ${disabledAttr(state.connected)}>載入存檔</button>
+          <button class="button primary" data-game-action="save" ${disabledAttr(state.connected)}>立即加密儲存</button>
+          <button class="button" data-game-action="load_save" ${disabledAttr(state.connected)}>載入本機加密存檔</button>
         </div>
       </div>
     </section>
@@ -177,12 +178,11 @@ export function renderSave(state) {
 
 export function renderSettings() {
   return `
-    ${pageHeader('設定', '此公開前端只保存可公開的顯示設定。')}
+    ${pageHeader('設定', '公開前端只保存可公開的顯示設定與後端簽發的加密存檔。')}
     <section class="panel">
       <div class="panel-body">
         <div class="empty-state">
-          API 網址請在 <code>js/config.js</code> 設定。<br />
-          請勿在 GitHub Pages 放 API Secret、私鑰、世界 Seed 演算法或任何核心規則。
+          API 網址可公開，但 API Secret、私鑰、存檔加密金鑰、世界 Seed 演算法與任何核心規則都不得放入 GitHub Pages。
         </div>
       </div>
     </section>
