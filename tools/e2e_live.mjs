@@ -44,7 +44,7 @@ try {
 
   // 1. Load the real GitHub Pages frontend.
   await page.goto(BASE_URL, { waitUntil: 'domcontentloaded', timeout: 90_000 })
-  await page.getByRole('heading', { name: '資本人生' }).waitFor()
+  await page.getByRole('heading', { name: '資本人生 Capital Life AI生成', exact: true }).waitFor()
   await page.getByRole('heading', { name: '🎲 隨機開始' }).waitFor()
   console.log('✓ GitHub Pages launch screen')
 
