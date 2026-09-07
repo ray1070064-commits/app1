@@ -22,14 +22,19 @@ function resetAdvanceCounter() {
 
 async function request(path, options = {}) {
   if (!API_BASE) throw new Error('正式後端尚未設定：請設定 VITE_API_BASE_URL')
+  const {
+    skipGameId = false,
+    headers: optionHeaders = {},
+    ...fetchOptions
+  } = options
   const response = await fetch(`${API_BASE}${path}`, {
+    ...fetchOptions,
+    credentials: fetchOptions.credentials ?? 'include',
     headers: {
       'Content-Type': 'application/json',
-      ...(ACTIVE_GAME_ID ? { 'X-Game-Id': ACTIVE_GAME_ID } : {}),
-      ...(options.headers || {}),
+      ...(!skipGameId && ACTIVE_GAME_ID ? { 'X-Game-Id': ACTIVE_GAME_ID } : {}),
+      ...optionHeaders,
     },
-    credentials: 'include',
-    ...options,
   })
   if (!response.ok) {
     let message = ''
@@ -101,7 +106,7 @@ export async function getMarketDepth(symbol) {
 export async function createGame(payload) {
   const result = USE_MOCKS
     ? { ok: true, gameId: 'local-preview', player: payload, snapshot: structuredClone(mockMarket) }
-    : await request('/api/v1/games', { method: 'POST', body: JSON.stringify(payload) })
+    : await request('/api/v1/games', { method: 'POST', body: JSON.stringify(payload), skipGameId: true })
   if (result?.gameId) {
     rememberGameId(result.gameId)
     resetAdvanceCounter()
@@ -170,12 +175,20 @@ export async function saveCurrentGameToBrowser() {
 
 export async function previewSaveCode(code) {
   if (USE_MOCKS) return { ok: true, preview: null }
-  return request('/api/v1/save/preview', { method: 'POST', body: JSON.stringify({ code }) })
+  return request('/api/v1/save/preview', {
+    method: 'POST',
+    body: JSON.stringify({ code }),
+    skipGameId: true,
+  })
 }
 
 export async function restoreSaveCode(code) {
   if (USE_MOCKS) throw new Error('Mock 模式不提供正式恢復')
-  const result = await request('/api/v1/save/restore', { method: 'POST', body: JSON.stringify({ code }), headers: {} })
+  const result = await request('/api/v1/save/restore', {
+    method: 'POST',
+    body: JSON.stringify({ code }),
+    skipGameId: true,
+  })
   if (result?.gameId) {
     rememberGameId(result.gameId)
     resetAdvanceCounter()
