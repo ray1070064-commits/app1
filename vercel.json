@@ -1,5 +1,5 @@
 {
   "rewrites": [
-    { "source": "/(.*)", "destination": "https://capital-life-api.onrender.com" }
+    { "source": "/(.*)", "destination": "https://app-lf18.onrender.com" }
   ]
 }
