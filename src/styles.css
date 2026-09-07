@@ -177,3 +177,10 @@ input:focus, select:focus { border-color: #6687ef; box-shadow: 0 0 0 3px rgba(86
   .trade-panel { display: block; }
   .price-chart { height: 240px; }
 }
+
+/* In-game UI density: render the active game at 90% while preserving viewport coverage. */
+body:has(.terminal-shell) #root {
+  width: 111.111111%;
+  min-height: 111.111111vh;
+  zoom: .9;
+}
