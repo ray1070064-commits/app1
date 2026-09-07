@@ -9,6 +9,7 @@ async function request(path, options = {}) {
       'Content-Type': 'application/json',
       ...(options.headers || {}),
     },
+    credentials: 'include',
     ...options,
   })
 
@@ -28,6 +29,14 @@ export function isMockMode() {
 export async function getMarketSnapshot() {
   if (USE_MOCKS) return structuredClone(mockMarket)
   return request('/api/v1/market/snapshot')
+}
+
+export async function getMarketHistory(symbol, timeframe = '3M') {
+  if (USE_MOCKS) {
+    const asset = mockMarket.assets.find((item) => item.symbol === symbol)
+    return { ok: Boolean(asset), symbol, timeframe, candles: structuredClone(asset?.candles || []) }
+  }
+  return request(`/api/v1/market/${encodeURIComponent(symbol)}/history?timeframe=${encodeURIComponent(timeframe)}`)
 }
 
 export async function createGame(payload) {
@@ -53,7 +62,7 @@ export async function placeOrder(payload) {
       order: {
         id: `preview-${Date.now()}`,
         ...payload,
-        status: 'filled',
+        status: payload.orderType === 'limit' ? 'pending' : 'filled',
       },
     }
   }
@@ -64,11 +73,29 @@ export async function placeOrder(payload) {
   })
 }
 
-export async function advanceTime(days) {
+export async function closePosition(payload) {
   if (USE_MOCKS) {
-    return { ok: true, advancedDays: days }
+    return {
+      ok: true,
+      closed: payload,
+    }
   }
 
+  return request(`/api/v1/positions/${encodeURIComponent(payload.positionId)}/close`, {
+    method: 'POST',
+    body: JSON.stringify({ quantity: payload.quantity }),
+  })
+}
+
+export async function cancelOrder(orderId) {
+  if (USE_MOCKS) return { ok: true, orderId, status: 'cancelled' }
+  return request(`/api/v1/orders/${encodeURIComponent(orderId)}`, {
+    method: 'DELETE',
+  })
+}
+
+export async function advanceTime(days) {
+  if (USE_MOCKS) return { ok: true, advancedDays: days }
   return request('/api/v1/time/advance', {
     method: 'POST',
     body: JSON.stringify({ days }),
