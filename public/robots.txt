@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://ray1070064-commits.github.io/capital-life/sitemap.xml
