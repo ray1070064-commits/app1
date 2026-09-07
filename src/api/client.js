@@ -3,10 +3,23 @@ import { getMockAssetDetails } from '../data/mockAssetDetails.js'
 
 const API_BASE = String(import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '')
 const USE_MOCKS = String(import.meta.env.VITE_USE_MOCKS ?? 'true') === 'true' || !API_BASE
+const GAME_ID_KEY = 'capital-life-game-id'
+let ACTIVE_GAME_ID = typeof window !== 'undefined' ? window.sessionStorage.getItem(GAME_ID_KEY) : null
+
+function rememberGameId(gameId) {
+  ACTIVE_GAME_ID = gameId || null
+  if (typeof window === 'undefined') return
+  if (ACTIVE_GAME_ID) window.sessionStorage.setItem(GAME_ID_KEY, ACTIVE_GAME_ID)
+  else window.sessionStorage.removeItem(GAME_ID_KEY)
+}
 
 async function request(path, options = {}) {
   const response = await fetch(`${API_BASE}${path}`, {
-    headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+    headers: {
+      'Content-Type': 'application/json',
+      ...(ACTIVE_GAME_ID ? { 'X-Game-Id': ACTIVE_GAME_ID } : {}),
+      ...(options.headers || {}),
+    },
     credentials: 'include',
     ...options,
   })
@@ -54,22 +67,21 @@ export async function getMarketDepth(symbol) {
 }
 
 export async function createGame(payload) {
-  if (USE_MOCKS) return { ok: true, gameId: 'local-preview', player: payload, snapshot: structuredClone(mockMarket) }
-  return request('/api/v1/games', { method: 'POST', body: JSON.stringify(payload) })
+  const result = USE_MOCKS
+    ? { ok: true, gameId: 'local-preview', player: payload, snapshot: structuredClone(mockMarket) }
+    : await request('/api/v1/games', { method: 'POST', body: JSON.stringify(payload) })
+  if (result?.gameId) rememberGameId(result.gameId)
+  return result
 }
 
 export async function placeOrder(payload) {
-  if (USE_MOCKS) {
-    return { ok: true, order: { id: `preview-${Date.now()}`, ...payload, status: payload.orderType === 'limit' ? 'pending' : 'filled' } }
-  }
+  if (USE_MOCKS) return { ok: true, order: { id: `preview-${Date.now()}`, ...payload, status: payload.orderType === 'limit' ? 'pending' : 'filled' } }
   return request('/api/v1/orders', { method: 'POST', body: JSON.stringify(payload) })
 }
 
 export async function closePosition(payload) {
   if (USE_MOCKS) return { ok: true, closed: payload }
-  return request(`/api/v1/positions/${encodeURIComponent(payload.positionId)}/close`, {
-    method: 'POST', body: JSON.stringify({ quantity: payload.quantity }),
-  })
+  return request(`/api/v1/positions/${encodeURIComponent(payload.positionId)}/close`, { method: 'POST', body: JSON.stringify({ quantity: payload.quantity }) })
 }
 
 export async function cancelOrder(orderId) {
