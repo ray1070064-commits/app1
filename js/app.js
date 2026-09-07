@@ -5,10 +5,13 @@ import {
   loadChart,
   loadGameState,
   loadLegacyUi,
-  loadSave,
-  saveGame,
   sendGameAction,
 } from './api.js';
+import {
+  persistEncryptedBrowserSave,
+  restoreEncryptedBrowserSave,
+  scheduleEncryptedAutosave,
+} from './browser-save.js';
 import {
   getState,
   patchUI,
@@ -97,6 +100,7 @@ async function execute(action, payload = {}, options = {}) {
     const nextState = stateFromResponse(response);
     if (nextState) setServerState(nextState);
     if (response?.ui) setLegacyUi(response.ui);
+    if (nextState?.world?.game_started) scheduleEncryptedAutosave();
     if (!options.silent) toast(response?.message || '操作完成', 'success');
     return response;
   } catch (error) {
@@ -112,10 +116,28 @@ async function executeSave(load = false) {
   }
 
   try {
-    const response = load ? await loadSave('default') : await saveGame('default');
-    const nextState = stateFromResponse(response);
-    if (nextState) setServerState(nextState);
-    toast(load ? '存檔已載入' : '進度已儲存', 'success');
+    if (load) {
+      const response = await restoreEncryptedBrowserSave();
+      if (!response) {
+        toast('瀏覽器中沒有可載入的加密存檔。', 'error');
+        return;
+      }
+      const nextState = stateFromResponse(response);
+      if (nextState) setServerState(nextState);
+      const symbol = nextState?.market?.selected_symbol || nextState?.market?.watchlist?.[0]?.symbol;
+      if (symbol) {
+        patchUI({ selectedSymbol: symbol });
+        await refreshChart(symbol);
+      }
+      toast('本機加密存檔已載入', 'success');
+    } else {
+      if (!getState().server?.world?.game_started) {
+        toast('尚未開始遊戲，沒有進度可儲存。', 'error');
+        return;
+      }
+      await persistEncryptedBrowserSave();
+      toast('進度已加密儲存在這台瀏覽器', 'success');
+    }
   } catch (error) {
     toast(error?.message || '存檔操作失敗', 'error');
   }
@@ -225,7 +247,16 @@ async function boot() {
 
   try {
     await ensureSession(false);
-    const payload = await loadGameState(false);
+
+    let payload = null;
+    try {
+      payload = await restoreEncryptedBrowserSave();
+      if (payload) toast('已恢復這台瀏覽器的加密存檔', 'success');
+    } catch (restoreError) {
+      toast(restoreError?.message || '本機存檔無法恢復，將使用新的 Session。', 'error');
+    }
+
+    if (!payload) payload = await loadGameState(false);
     const serverState = stateFromResponse(payload);
     if (serverState) {
       setServerState(serverState);
