@@ -21,7 +21,7 @@
       </div>
 
       <div class="topbar-center" aria-label="遊戲摘要">
-        <div class="summary-chip"><span>日期</span><strong id="summary-date">—</strong></div>
+        <div class="summary-chip"><span>遊戲日</span><strong id="summary-date">—</strong></div>
         <div class="summary-chip"><span>現金</span><strong id="summary-cash">—</strong></div>
         <div class="summary-chip"><span>總資產</span><strong id="summary-networth">—</strong></div>
       </div>
@@ -39,6 +39,7 @@
         <button class="nav-button" data-view="company">公司經營</button>
         <button class="nav-button" data-view="politics">政治法律</button>
         <button class="nav-button" data-view="news">市場新聞</button>
+        <button class="nav-button" data-view="full">完整功能</button>
         <div class="sidebar-spacer"></div>
         <button class="nav-button" data-view="save">存檔管理</button>
         <button class="nav-button" data-view="settings">設定</button>
@@ -46,8 +47,8 @@
 
       <main class="main-stage">
         <section id="backend-banner" class="backend-banner is-visible" role="status">
-          <strong>前端骨架已啟動。</strong>
-          <span>目前尚未設定遊戲後端，因此所有會改變遊戲狀態的操作都會被鎖定。</span>
+          <strong>前端已啟動。</strong>
+          <span>遊戲核心由 Private FastAPI Backend 執行；若後端未連線，所有會改變遊戲狀態的操作都會鎖定。</span>
         </section>
 
         <div id="view-root" class="view-root" aria-live="polite"></div>
