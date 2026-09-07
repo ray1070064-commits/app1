@@ -11,7 +11,7 @@ import './tutorial.css'
 import './settlement.css'
 import './parity.css'
 import './ui-system.css'
-import './p0.css'
+import './p1-closeout.css'
 
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>
