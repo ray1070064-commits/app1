@@ -96,10 +96,11 @@ export const quickStartOptions = {
   balances: [50000, 75000, 100000, 125000, 150000, 200000],
   ages: [18, 20, 22, 25, 28, 31, 35, 40],
   jobs: [
-    { id: 'software_junior', name: '初階軟體工程師', skill: '程式技能' },
-    { id: 'finance_junior', name: '初階金融分析師', skill: '金融技能' },
-    { id: 'sales_junior', name: '初階業務', skill: '銷售技能' },
-    { id: 'designer_junior', name: '初階設計師', skill: '設計技能' },
-    { id: 'operator_junior', name: '初階營運專員', skill: '營運技能' },
+    { id: 'junior_dev', name: '初級軟體工程師', skill: '軟體開發', dailySalary: 150 },
+    { id: 'assistant_trader', name: '交易助理', skill: '金融交易', dailySalary: 115 },
+    { id: 'delivery', name: '物流配送員', skill: '物流運輸', dailySalary: 90 },
+    { id: 'sales_assistant', name: '門市業務助理', skill: '業務行銷', dailySalary: 105 },
+    { id: 'care_assistant', name: '照護助理', skill: '醫療照護', dailySalary: 120 },
+    { id: 'factory_tech', name: '初級製造技術員', skill: '工程製造', dailySalary: 125 },
   ],
 }
