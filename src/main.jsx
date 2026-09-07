@@ -8,6 +8,7 @@ import './life.css'
 import './deep-life.css'
 import './feature.css'
 import './tutorial.css'
+import './settlement.css'
 
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>
