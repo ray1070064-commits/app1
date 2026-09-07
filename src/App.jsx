@@ -10,6 +10,7 @@ import {
 import FeatureCenter from './components/FeatureCenter.jsx'
 import LifeCenter from './components/LifeCenter.jsx'
 import MarketTerminal from './components/MarketTerminal.jsx'
+import ParityActions from './components/ParityActions.jsx'
 import TutorialCoach from './components/TutorialCoach.jsx'
 import { quickStartOptions } from './data/mockMarket.js'
 
@@ -108,7 +109,7 @@ function LaunchScreen({ onStart }) {
       </article>
     </section>
 
-    <section className="import-strip"><button type="button" className="ghost-button" onClick={() => setImportOpen((v) => !v)}>📥 匯入存檔</button>{importOpen && <div className="import-box"><textarea className="save-code" value={importCode} onChange={(e) => { setImportCode(e.target.value); setImportPreview(null) }} placeholder="貼上 CL181... 存檔碼" /><div className="life-action-row"><button type="button" className="ghost-button" disabled={busy || !importCode.trim()} onClick={inspectImport}>檢查</button><button type="button" className="primary-button inline-primary" disabled={busy || !importCode.trim()} onClick={restoreImport}>恢復這段人生</button></div>{importPreview && <div className="save-preview"><strong>Day {importPreview.day}</strong><span>{Number(importPreview.age || 0).toFixed(1)} 歲</span><span>{importPreview.jobId}</span><span>{formatMoney(importPreview.cash)}</span></div>}</div>}</section>
+    <section className="import-strip"><button type="button" className="ghost-button" onClick={() => setImportOpen((v) => !v)}>📥 匯入存檔</button>{importOpen && <div className="import-box"><textarea className="save-code" value={importCode} onChange={(e) => { setImportCode(e.target.value); setImportPreview(null) }} placeholder="貼上 CL181... 或舊 LCMG:... 存檔碼" /><div className="life-action-row"><button type="button" className="ghost-button" disabled={busy || !importCode.trim()} onClick={inspectImport}>檢查</button><button type="button" className="primary-button inline-primary" disabled={busy || !importCode.trim()} onClick={restoreImport}>恢復這段人生</button></div>{importPreview && <div className="save-preview"><strong>Day {importPreview.day}</strong><span>{Number(importPreview.age || 0).toFixed(1)} 歲</span><span>{importPreview.jobId}</span><span>{formatMoney(importPreview.cash)}</span>{importPreview.legacy && <span>舊版存檔・將自動遷移</span>}</div>}</div>}</section>
     {error && <div className="launch-error">{error}</div>}
   </main>
 }
@@ -124,6 +125,7 @@ function GameShell({ player, onExit, onPlayerChange }) {
       <button type="button" className={`ghost-button ${mode === 'feature' ? 'active' : ''}`} onClick={() => setMode('feature')}>🏠 資產／健康／生涯</button>
     </div>
     <TutorialCoach mode={mode} onGoLife={() => setMode('life')} />
+    <ParityActions mode={mode} />
     {mode === 'life'
       ? <LifeCenter key={`life-${key}`} player={player} onMarket={() => setMode('market')} onExit={onExit} onRestored={(result) => onPlayerChange(resultToPlayer(result))} />
       : mode === 'feature'
