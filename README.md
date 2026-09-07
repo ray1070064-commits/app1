@@ -1,1 +1,1 @@
-# 資本人生｜Public Frontend
+# 資本人生｜Public Frontend AI生成
