@@ -8,10 +8,10 @@ import {
   getPowerRisk,
 } from '../api/client.js'
 import CareerPanel from './p1/CareerPanel.jsx'
-import CompanyPanel from './p1/CompanyPanel.jsx'
+import CompanyPanel from './p2/CompanyPanel.jsx'
 import FamilyPanel from './p1/FamilyPanel.jsx'
 import { LifeStoryPanel, SavePanel } from './p1/LifeStoryPanel.jsx'
-import PowerPanel from './p1/PowerPanel.jsx'
+import PowerPanel from './p2/PowerPanel.jsx'
 import { Metric, Section, money } from './p1/P1Ui.jsx'
 
 const TABS = [
@@ -35,7 +35,7 @@ function Overview({ data }) {
     </div>
     {life.pendingEvent && <Section title="目前需要你決定" className="deep-alert-card"><div className="decision-highlight"><strong>{life.pendingEvent.title}</strong><p>{life.pendingEvent.desc}</p><small>期限 Day {life.pendingEvent.deadline_day || life.pendingEvent.deadlineDay || '—'}</small></div></Section>}
     <Section title="這段人生"><div className="life-summary-row"><span>Day {snap.day || 1}</span><span>{Number(snap.age || 25).toFixed(1)} 歲</span><span>XP {life.xp || 0}</span><span>聲望 {Number(life.reputation || career.reputation || 50).toFixed(0)}</span><span>故事記憶 {life.memories?.length || 0}</span><span>待續事件 {life.followupCount || 0}</span></div></Section>
-    <Section title="P1 正式頁整合"><div className="deep-chip-row"><span>職涯：公司跳槽已整合</span><span>家庭：候選人／冷卻／婚育已整合</span><span>公司：完整創業／MYCO 已整合</span><span>權力：特殊行動已整合</span></div></Section>
+    <Section title="正式頁整合"><div className="deep-chip-row"><span>職涯：公司跳槽已整合</span><span>家庭：候選人／冷卻／婚育已整合</span><span>公司：創業／MYCO／批次人事已整合</span><span>權力：特殊行動／非法資金 Ledger 已整合</span></div></Section>
   </div>
 }
 
