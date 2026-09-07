@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 
-const CATEGORY_OPTIONS = ['全部', '股票', 'ETF', '加密', '商品', '外匯']
+const CATEGORY_OPTIONS = ['全部', '股票', 'ETF', '加密', '商品', '固定收益', '外匯']
 
 function formatPrice(asset) {
   const digits = asset.price >= 1000 ? 0 : asset.price >= 100 ? 2 : 4
@@ -15,7 +15,7 @@ export default function Watchlist({ assets, selectedSymbol, onSelect, search, on
     const keyword = search.trim().toLowerCase()
     return assets.filter((asset) => {
       const categoryMatch = category === '全部' || asset.category === category
-      const searchMatch = !keyword || [asset.symbol, asset.name, asset.sector, asset.category]
+      const searchMatch = !keyword || [asset.symbol, asset.displayTicker, asset.name, asset.sector, asset.category]
         .some((value) => String(value || '').toLowerCase().includes(keyword))
       return categoryMatch && searchMatch
     })
@@ -62,7 +62,7 @@ export default function Watchlist({ assets, selectedSymbol, onSelect, search, on
             onClick={() => onSelect(asset.symbol)}
           >
             <span className="ticker-cell">
-              <strong>{asset.symbol}</strong>
+              <strong>{asset.displayTicker || asset.symbol}</strong>
               <small>{asset.name}</small>
             </span>
             <span className="price-cell">
