@@ -6,6 +6,7 @@ const USE_MOCKS = String(import.meta.env.VITE_USE_MOCKS ?? 'false') === 'true'
 const GAME_ID_KEY = 'capital-life-game-id'
 const SAVE_CODE_KEY = 'capital-life-public-save-v181'
 const SAVE_META_KEY = 'capital-life-public-save-meta-v181'
+const ADVANCE_COUNT_KEY = 'capital-life-advance-clicks-v182'
 let ACTIVE_GAME_ID = typeof window !== 'undefined' ? window.sessionStorage.getItem(GAME_ID_KEY) : null
 
 function rememberGameId(gameId) {
@@ -13,6 +14,10 @@ function rememberGameId(gameId) {
   if (typeof window === 'undefined') return
   if (ACTIVE_GAME_ID) window.sessionStorage.setItem(GAME_ID_KEY, ACTIVE_GAME_ID)
   else window.sessionStorage.removeItem(GAME_ID_KEY)
+}
+
+function resetAdvanceCounter() {
+  if (typeof window !== 'undefined') window.localStorage.setItem(ADVANCE_COUNT_KEY, '0')
 }
 
 async function request(path, options = {}) {
@@ -57,6 +62,7 @@ export function clearBrowserSave() {
   if (typeof window === 'undefined') return
   window.localStorage.removeItem(SAVE_CODE_KEY)
   window.localStorage.removeItem(SAVE_META_KEY)
+  window.localStorage.removeItem(ADVANCE_COUNT_KEY)
 }
 
 export async function getMarketSnapshot() {
@@ -96,7 +102,10 @@ export async function createGame(payload) {
   const result = USE_MOCKS
     ? { ok: true, gameId: 'local-preview', player: payload, snapshot: structuredClone(mockMarket) }
     : await request('/api/v1/games', { method: 'POST', body: JSON.stringify(payload) })
-  if (result?.gameId) rememberGameId(result.gameId)
+  if (result?.gameId) {
+    rememberGameId(result.gameId)
+    resetAdvanceCounter()
+  }
   return result
 }
 
@@ -117,7 +126,23 @@ export async function cancelOrder(orderId) {
 
 export async function advanceTime(days) {
   if (USE_MOCKS) return { ok: true, advancedDays: days }
-  return request('/api/v1/time/advance', { method: 'POST', body: JSON.stringify({ days }) })
+  const result = await request('/api/v1/time/advance', { method: 'POST', body: JSON.stringify({ days }) })
+  if (typeof window !== 'undefined') {
+    let count = Math.max(0, Number(window.localStorage.getItem(ADVANCE_COUNT_KEY) || 0)) + 1
+    if (count >= 7) {
+      try {
+        const saved = await exportSave()
+        writeBrowserSave(saved)
+        result.autoSaved = true
+        result.savePreview = saved.preview || null
+        count = 0
+      } catch {
+        // The game-day advance already succeeded; an autosave failure must not roll it back.
+      }
+    }
+    window.localStorage.setItem(ADVANCE_COUNT_KEY, String(count))
+  }
+  return result
 }
 
 export async function getCareer() { return request('/api/v1/career') }
@@ -151,7 +176,10 @@ export async function previewSaveCode(code) {
 export async function restoreSaveCode(code) {
   if (USE_MOCKS) throw new Error('Mock 模式不提供正式恢復')
   const result = await request('/api/v1/save/restore', { method: 'POST', body: JSON.stringify({ code }), headers: {} })
-  if (result?.gameId) rememberGameId(result.gameId)
+  if (result?.gameId) {
+    rememberGameId(result.gameId)
+    resetAdvanceCounter()
+  }
   if (typeof window !== 'undefined' && code) {
     window.localStorage.setItem(SAVE_CODE_KEY, code)
     try {
