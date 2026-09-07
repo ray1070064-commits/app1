@@ -20,6 +20,7 @@ import {
 } from './state.js';
 import { renderView } from './views.js';
 import { collectLegacyInputs, renderLegacyCompatibility } from './legacy.js';
+import { drawMarketChart } from './chart.js';
 import { formatMoney, toast } from './ui.js';
 
 const viewRoot = document.getElementById('view-root');
@@ -57,6 +58,7 @@ function render() {
     viewRoot.innerHTML = renderLegacyCompatibility(state.ui.legacy, state.connected);
   } else {
     viewRoot.innerHTML = renderView(state);
+    if (state.ui.activeView === 'trading') drawMarketChart(state.ui.chart);
   }
 }
 
