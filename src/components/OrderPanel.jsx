@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import MarketAutomationPanel from './MarketAutomationPanel.jsx'
 
 const MODES = [
   { id: 'SPOT', label: 'Spot' },
@@ -16,7 +17,7 @@ function formatMoney(value) {
   }).format(Number(value || 0))
 }
 
-export default function OrderPanel({ asset, account, onSubmit, busy, notice }) {
+export default function OrderPanel({ asset, account, positions = [], onSubmit, busy, notice }) {
   const [mode, setMode] = useState('SPOT')
   const [orderType, setOrderType] = useState('market')
   const [spotSide, setSpotSide] = useState('buy')
@@ -152,6 +153,8 @@ export default function OrderPanel({ asset, account, onSubmit, busy, notice }) {
 
         {notice && <div className="order-notice">{notice}</div>}
       </form>
+
+      <MarketAutomationPanel asset={asset} positions={positions} />
     </aside>
   )
 }
