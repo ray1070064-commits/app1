@@ -128,6 +128,18 @@ export async function sendGameAction(action, payload = {}, options = {}) {
   });
 }
 
+export async function exportEncryptedBrowserSave() {
+  return request('/browser-save/export', { method: 'POST' });
+}
+
+export async function importEncryptedBrowserSave(saveCode) {
+  return request('/browser-save/import', {
+    method: 'POST',
+    body: JSON.stringify({ save_code: String(saveCode || '') }),
+  });
+}
+
+// Transitional server-side save slots. The browser UI now prefers encrypted local saves.
 export async function saveGame(slot = 'default') {
   return request('/save', {
     method: 'POST',
