@@ -104,6 +104,10 @@ async function request(path, options = {}, retryAuth = true) {
   }
 }
 
+export async function loadStartupConfig() {
+  return request('/startup', { method: 'GET' });
+}
+
 export async function loadGameState(includeUi = false) {
   return request(`/state?include_ui=${includeUi ? 'true' : 'false'}`, { method: 'GET' });
 }
@@ -139,7 +143,6 @@ export async function importEncryptedBrowserSave(saveCode) {
   });
 }
 
-// Transitional server-side save slots. The browser UI now prefers encrypted local saves.
 export async function saveGame(slot = 'default') {
   return request('/save', {
     method: 'POST',
