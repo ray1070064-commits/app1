@@ -55,18 +55,19 @@ button:disabled {
   color: var(--muted, #94a3b8);
 }
 
-/* Long advances are synchronous by design. Give immediate feedback so the UI never looks dead. */
+/* The market uses one busy flag for trading and time advance. Keep this message
+   deliberately generic so an order action is never mislabeled as fast-forward. */
 .advance-controls {
   position: relative;
 }
 
 .advance-controls:has(button:disabled)::after {
-  content: "模擬中… 長時間推進使用精簡快速模式";
+  content: "處理中… 請稍候";
   position: absolute;
   top: calc(100% + 7px);
   right: 0;
   z-index: 25;
-  min-width: 220px;
+  min-width: 150px;
   padding: 7px 10px;
   border: 1px solid var(--p2-border);
   border-radius: 8px;
@@ -93,13 +94,6 @@ button:disabled {
 .parity-notice,
 .launch-error {
   overflow-wrap: anywhere;
-}
-
-.watch-row-wrap,
-.feature-card,
-.life-card,
-.panel {
-  contain: layout paint;
 }
 
 @media (max-width: 900px) {
