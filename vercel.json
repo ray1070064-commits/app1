@@ -1,47 +1,9 @@
-Skip to content
-ray1070064-commits
-capital-life
-Repository navigation
-Code
-Issues
-Pull requests
-Agents
-Actions
-Projects
-Wiki
-Security and quality
-Insights
-Settings
-capital-life
-/
-vercel.json
-in
-main
-
-Edit
-
-Preview
-Indent mode
-
-Spaces
-Indent size
-
-2
-Line wrap mode
-
-No wrap
-Editing vercel.json file contents
-  1
-  2
-  3
-  4
-  5
-  6
 {
+  "version": 2,
   "rewrites": [
-    { "source": "/(.*)", "destination": "https://app-lf18.onrender.com/" }
+    {
+      "source": "/(.*)",
+      "destination": "https://onrender.com"
+    }
   ]
 }
-
-Use Control + Shift + m to toggle the tab key moving focus. Alternatively, use esc then tab to move to the next interactive element on the page.
- 
