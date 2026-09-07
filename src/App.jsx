@@ -1,8 +1,9 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   clearBrowserSave,
   createGame,
   getBrowserSaveMeta,
+  getFeatureState,
   previewSaveCode,
   restoreBrowserSave,
   restoreSaveCode,
@@ -10,6 +11,7 @@ import {
 import FeatureCenter from './components/FeatureCenter.jsx'
 import LifeCenter from './components/LifeCenter.jsx'
 import MarketTerminal from './components/MarketTerminal.jsx'
+import P0GameplayDock from './components/P0GameplayDock.jsx'
 import ParityActions from './components/ParityActions.jsx'
 import TutorialCoach from './components/TutorialCoach.jsx'
 import { quickStartOptions } from './data/mockMarket.js'
@@ -116,22 +118,42 @@ function LaunchScreen({ onStart }) {
 
 function GameShell({ player, onExit, onPlayerChange }) {
   const [mode, setMode] = useState('market')
+  const [tutorialState, setTutorialState] = useState(null)
   const key = useMemo(() => player.gameId || 'game', [player.gameId])
 
-  return <>
+  useEffect(() => {
+    let alive = true
+    async function loadTutorial() {
+      try {
+        const result = await getFeatureState()
+        if (alive) setTutorialState(result?.tutorial || null)
+      } catch { /* TutorialCoach and the next poll will retry. */ }
+    }
+    loadTutorial()
+    const timer = window.setInterval(loadTutorial, 1200)
+    return () => { alive = false; window.clearInterval(timer) }
+  }, [key])
+
+  const tutorialActive = Boolean(player.tutorial) && (tutorialState ? Boolean(tutorialState.active && !tutorialState.completed) : true)
+  const lifeLocked = tutorialActive && !Boolean(tutorialState?.lifeModeUnlocked)
+  const timeLocked = tutorialActive && !Boolean(tutorialState?.timeAdvanceUnlocked)
+  const longLocked = tutorialActive && !Boolean(tutorialState?.longAdvanceUnlocked)
+
+  return <div className={`game-runtime ${timeLocked ? 'tutorial-time-locked' : ''} ${longLocked ? 'tutorial-long-locked' : ''}`}>
     <div className="game-mode-dock" aria-label="遊戲模式">
       <button type="button" className={`ghost-button ${mode === 'market' ? 'active' : ''}`} onClick={() => setMode('market')}>📈 市場</button>
-      <button type="button" className={`ghost-button ${mode === 'life' ? 'active' : ''}`} onClick={() => setMode('life')}>👤 人生／經營</button>
-      <button type="button" className={`ghost-button ${mode === 'feature' ? 'active' : ''}`} onClick={() => setMode('feature')}>🏠 資產／健康／生涯</button>
+      <button type="button" disabled={lifeLocked} className={`ghost-button ${lifeLocked ? 'locked' : ''} ${mode === 'life' ? 'active' : ''}`} onClick={() => setMode('life')}>👤 人生／經營</button>
+      <button type="button" disabled={lifeLocked} className={`ghost-button ${lifeLocked ? 'locked' : ''} ${mode === 'feature' ? 'active' : ''}`} onClick={() => setMode('feature')}>🏠 資產／健康／生涯</button>
     </div>
-    <TutorialCoach mode={mode} onGoLife={() => setMode('life')} />
+    <TutorialCoach mode={mode} onGoLife={() => { if (!lifeLocked) setMode('life') }} />
     <ParityActions mode={mode} />
+    <P0GameplayDock active={!lifeLocked} onRetired={() => setMode('feature')} />
     {mode === 'life'
       ? <LifeCenter key={`life-${key}`} player={player} onMarket={() => setMode('market')} onExit={onExit} onRestored={(result) => onPlayerChange(resultToPlayer(result))} />
       : mode === 'feature'
-        ? <FeatureCenter key={`feature-${key}`} player={player} onMarket={() => setMode('market')} onLife={() => setMode('life')} onExit={onExit} />
+        ? <FeatureCenter key={`feature-${key}`} player={player} onMarket={() => setMode('market')} onLife={() => { if (!lifeLocked) setMode('life') }} onExit={onExit} />
         : <MarketTerminal key={`market-${key}`} player={player} onExit={onExit} />}
-  </>
+  </div>
 }
 
 export default function App() {
