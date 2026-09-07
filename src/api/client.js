@@ -56,6 +56,33 @@ function writeBrowserSave(result) {
   window.localStorage.setItem(SAVE_META_KEY, JSON.stringify(result.preview || {}))
 }
 
+function readPartnerStoryFromUi() {
+  if (typeof document === 'undefined') return {}
+  const root = document.querySelector('.deep-family-profile')
+  if (!root) return {}
+  const story = {}
+  root.querySelectorAll('div').forEach((row) => {
+    const label = row.querySelector('span')?.textContent?.trim()
+    const value = row.querySelector('strong')?.textContent?.trim()
+    if (!value) return
+    if (label === '相遇方式') story.partnerMeetingMethod = value
+    if (label === '個性') story.partnerPersonality = value
+  })
+  return story
+}
+
+function decorateFamilyResult(result) {
+  const family = result?.family
+  if (!family) return result
+  const meeting = String(family.partner_meeting_method || '').trim()
+  const personality = String(family.partner_personality || '').trim()
+  if (meeting || personality) {
+    const job = String(family.partner_job || '').split('｜')[0]
+    family.partner_job = [job, meeting ? `相遇：${meeting}` : '', personality ? `個性：${personality}` : ''].filter(Boolean).join('｜')
+  }
+  return result
+}
+
 export function isMockMode() { return USE_MOCKS }
 export function getBrowserSaveCode() { return typeof window === 'undefined' ? '' : (window.localStorage.getItem(SAVE_CODE_KEY) || '') }
 export function getBrowserSaveMeta() {
@@ -152,8 +179,14 @@ export async function advanceTime(days) {
 
 export async function getCareer() { return request('/api/v1/career') }
 export async function careerAction(action, payload = {}) { return request('/api/v1/career/action', { method: 'POST', body: JSON.stringify({ action, payload }) }) }
-export async function getFamily() { return request('/api/v1/family') }
-export async function familyAction(action, payload = {}) { return request('/api/v1/family/action', { method: 'POST', body: JSON.stringify({ action, payload }) }) }
+export async function getFamily() {
+  const result = await request('/api/v1/family')
+  return decorateFamilyResult(result)
+}
+export async function familyAction(action, payload = {}) {
+  const nextPayload = action === 'start_dating' ? { ...payload, ...readPartnerStoryFromUi() } : payload
+  return request('/api/v1/family/action', { method: 'POST', body: JSON.stringify({ action, payload: nextPayload }) })
+}
 export async function getCompany() { return request('/api/v1/company') }
 export async function companyAction(action, payload = {}) { return request('/api/v1/company/action', { method: 'POST', body: JSON.stringify({ action, payload }) }) }
 export async function getPowerRisk() { return request('/api/v1/power-risk') }
