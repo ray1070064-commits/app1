@@ -7,6 +7,7 @@ import {
   restoreBrowserSave,
   restoreSaveCode,
 } from './api/client.js'
+import FeatureCenter from './components/FeatureCenter.jsx'
 import LifeCenter from './components/LifeCenter.jsx'
 import MarketTerminal from './components/MarketTerminal.jsx'
 import { quickStartOptions } from './data/mockMarket.js'
@@ -99,7 +100,7 @@ function LaunchScreen({ onStart }) {
       <article className="start-card setup-card">
         <div className="card-heading"><div><span className="card-kicker">NEW GAME</span><h2>🎛️ 開局設定</h2></div></div>
         <div className="form-grid"><label><span>起始資金</span><input type="number" min="10000" max="500000" step="5000" value={custom.balance} onChange={(event) => setCustom({ ...custom, balance: Number(event.target.value) })} /></label><label><span>起始年齡</span><input type="number" min="18" max="60" value={custom.age} onChange={(event) => setCustom({ ...custom, age: Number(event.target.value) })} /></label></div>
-        <label className="field-block"><span>職業</span><select value={custom.job} onChange={(event) => setCustom({ ...custom, job: event.target.value })}>{quickStartOptions.jobs.map((job) => <option value={job.id} key={job.id}>{job.name}</option>)}</select></label>
+        <label className="field-block"><span>職業</span><select value={custom.job} onChange={(event) => setCustom({ ...custom, job: event.target.value })}>{quickStartOptions.jobs.map((job) => <option value={job.id} key={job.id}>{job.name}・{formatMoney(job.dailySalary || 0)}/日</option>)}</select></label>
         <label className="field-block"><span>世界 Seed</span><input type="text" value={custom.seed} placeholder="留空代表隨機" onChange={(event) => setCustom({ ...custom, seed: event.target.value })} /></label>
         <label className="toggle-row"><span>新手教學</span><input type="checkbox" checked={custom.tutorial} onChange={(event) => setCustom({ ...custom, tutorial: event.target.checked })} /></label>
         <button className="secondary-primary-button" type="button" disabled={busy} onClick={() => begin({ startBalance: custom.balance, startAge: custom.age, jobId: custom.job, seed: custom.seed || crypto.randomUUID().replaceAll('-', '').slice(0, 12), tutorial: custom.tutorial, startMode: 'custom' })}>建立人生並進入市場</button>
@@ -114,13 +115,18 @@ function LaunchScreen({ onStart }) {
 function GameShell({ player, onExit, onPlayerChange }) {
   const [mode, setMode] = useState('market')
   const key = useMemo(() => player.gameId || 'game', [player.gameId])
-  if (mode === 'life') return <LifeCenter key={`life-${key}`} player={player} onMarket={() => setMode('market')} onExit={onExit} onRestored={(result) => onPlayerChange(resultToPlayer(result))} />
+
   return <>
     <div className="game-mode-dock" aria-label="遊戲模式">
-      <button type="button" className="ghost-button active">📈 市場</button>
-      <button type="button" className="ghost-button" onClick={() => setMode('life')}>👤 人生／經營</button>
+      <button type="button" className={`ghost-button ${mode === 'market' ? 'active' : ''}`} onClick={() => setMode('market')}>📈 市場</button>
+      <button type="button" className={`ghost-button ${mode === 'life' ? 'active' : ''}`} onClick={() => setMode('life')}>👤 人生／經營</button>
+      <button type="button" className={`ghost-button ${mode === 'feature' ? 'active' : ''}`} onClick={() => setMode('feature')}>🏠 資產／健康／生涯</button>
     </div>
-    <MarketTerminal key={`market-${key}`} player={player} onExit={onExit} />
+    {mode === 'life'
+      ? <LifeCenter key={`life-${key}`} player={player} onMarket={() => setMode('market')} onExit={onExit} onRestored={(result) => onPlayerChange(resultToPlayer(result))} />
+      : mode === 'feature'
+        ? <FeatureCenter key={`feature-${key}`} player={player} onMarket={() => setMode('market')} onLife={() => setMode('life')} onExit={onExit} />
+        : <MarketTerminal key={`market-${key}`} player={player} onExit={onExit} />}
   </>
 }
 
