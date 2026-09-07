@@ -1,1 +1,9 @@
-# 資本人生 Capital Life AI生成
+# 資本人生 Capital Life｜AI 製作的投資 × 人生模擬遊戲
+
+**資本人生 Capital Life** 是一款由 **AI 協助製作** 的免費瀏覽器模擬遊戲。
+
+遊戲以股票、ETF、加密資產、商品與外匯交易為核心，並結合職涯、家庭、創業、房地產、健康、政治法律、人生事件、成就、稱號、挑戰與退休結算。
+
+遊戲網址：<https://ray1070064-commits.github.io/capital-life/>
+
+關鍵字：資本人生、Capital Life、AI 遊戲、AI 製作遊戲、股票遊戲、投資模擬遊戲、人生模擬遊戲、瀏覽器遊戲。
