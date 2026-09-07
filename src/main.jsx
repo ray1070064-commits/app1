@@ -12,6 +12,7 @@ import './settlement.css'
 import './parity.css'
 import './ui-system.css'
 import './p1-closeout.css'
+import './p2-quality.css'
 
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>
