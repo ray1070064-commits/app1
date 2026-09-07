@@ -10,6 +10,7 @@ import './feature.css'
 import './tutorial.css'
 import './settlement.css'
 import './parity.css'
+import './p0.css'
 import './ui-system.css'
 
 createRoot(document.getElementById('root')).render(
