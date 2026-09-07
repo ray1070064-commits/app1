@@ -10,6 +10,7 @@ import {
 import FeatureCenter from './components/FeatureCenter.jsx'
 import LifeCenter from './components/LifeCenter.jsx'
 import MarketTerminal from './components/MarketTerminal.jsx'
+import TutorialCoach from './components/TutorialCoach.jsx'
 import { quickStartOptions } from './data/mockMarket.js'
 
 function randomItem(items) { return items[Math.floor(Math.random() * items.length)] }
@@ -122,6 +123,7 @@ function GameShell({ player, onExit, onPlayerChange }) {
       <button type="button" className={`ghost-button ${mode === 'life' ? 'active' : ''}`} onClick={() => setMode('life')}>👤 人生／經營</button>
       <button type="button" className={`ghost-button ${mode === 'feature' ? 'active' : ''}`} onClick={() => setMode('feature')}>🏠 資產／健康／生涯</button>
     </div>
+    <TutorialCoach mode={mode} onGoLife={() => setMode('life')} />
     {mode === 'life'
       ? <LifeCenter key={`life-${key}`} player={player} onMarket={() => setMode('market')} onExit={onExit} onRestored={(result) => onPlayerChange(resultToPlayer(result))} />
       : mode === 'feature'
