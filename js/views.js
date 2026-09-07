@@ -16,6 +16,66 @@ function disabledAttr(connected) {
   return connected ? '' : 'disabled';
 }
 
+export function renderStart(state) {
+  const config = state.ui.startup || {};
+  const balance = config.balance || {};
+  const age = config.age || {};
+  const jobs = Array.isArray(config.jobs) ? config.jobs : [];
+  const connected = state.connected;
+
+  const jobOptions = jobs.length
+    ? jobs.map(job => `<option value="${escapeHtml(job.key)}">${escapeHtml(job.name)}｜基準日薪 ${escapeHtml(formatMoney(job.daily_salary))}</option>`).join('')
+    : '<option value="">等待後端載入工作清單</option>';
+
+  return `
+    ${pageHeader('開始新人生', '開局只提交玩家選擇；世界生成、初始市場與所有遊戲規則仍由私有後端執行。')}
+    <div class="cards-grid">
+      <section class="panel" style="max-width:760px">
+        <div class="panel-header">新遊戲設定</div>
+        <div class="panel-body">
+          <div class="field">
+            <label for="start-balance">起始資金</label>
+            <input id="start-balance" class="input" type="number"
+              min="${escapeHtml(balance.min ?? 10000)}"
+              max="${escapeHtml(balance.max ?? 5000000)}"
+              step="${escapeHtml(balance.step ?? 10000)}"
+              value="${escapeHtml(balance.default ?? 100000)}" />
+          </div>
+
+          <div class="field">
+            <label for="start-job">開局工作</label>
+            <select id="start-job" class="select">${jobOptions}</select>
+          </div>
+
+          <div class="field">
+            <label for="start-age">起始年齡</label>
+            <input id="start-age" class="input" type="number"
+              min="${escapeHtml(age.min ?? 18)}"
+              max="${escapeHtml(age.max ?? 60)}"
+              step="1"
+              value="${escapeHtml(age.default ?? 25)}" />
+          </div>
+
+          <div class="field">
+            <label for="start-seed">世界 Seed（可留空隨機）</label>
+            <input id="start-seed" class="input" type="text" maxlength="${escapeHtml(config.seed?.max_length ?? 64)}" autocomplete="off" />
+          </div>
+
+          <label class="field" style="display:flex;gap:10px;align-items:center">
+            <input id="start-tutorial" type="checkbox" ${config.tutorial_default === false ? '' : 'checked'} />
+            <span>啟用股票核心教學</span>
+          </label>
+
+          <button class="button primary full" data-game-action="new_game" ${disabledAttr(connected || !jobs.length)}>
+            開始遊戲
+          </button>
+          <p class="muted" style="margin-top:12px">如果需要舊版所有特殊開局工具，可使用左側「完整功能」。</p>
+        </div>
+      </section>
+    </div>
+  `;
+}
+
 function renderWatchlist(items, selectedSymbol) {
   if (!Array.isArray(items) || items.length === 0) {
     return '<div class="empty-state">等待後端提供 watchlist 資料。</div>';
@@ -191,6 +251,7 @@ export function renderSettings() {
 
 export function renderView(state) {
   switch (state.ui.activeView) {
+    case 'start': return renderStart(state);
     case 'life': return renderLife(state);
     case 'company': return renderCompany(state);
     case 'politics': return renderPolitics(state);
