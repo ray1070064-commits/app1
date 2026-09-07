@@ -2,7 +2,8 @@ import { mockMarket } from '../data/mockMarket.js'
 import { getMockAssetDetails } from '../data/mockAssetDetails.js'
 
 const API_BASE = String(import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '')
-const USE_MOCKS = String(import.meta.env.VITE_USE_MOCKS ?? 'true') === 'true' || !API_BASE
+// 正式網站預設只使用私有 API；Mock 僅在明確設定 VITE_USE_MOCKS=true 時開啟。
+const USE_MOCKS = String(import.meta.env.VITE_USE_MOCKS ?? 'false') === 'true'
 const GAME_ID_KEY = 'capital-life-game-id'
 let ACTIVE_GAME_ID = typeof window !== 'undefined' ? window.sessionStorage.getItem(GAME_ID_KEY) : null
 
@@ -14,6 +15,7 @@ function rememberGameId(gameId) {
 }
 
 async function request(path, options = {}) {
+  if (!API_BASE) throw new Error('正式後端尚未設定：請設定 VITE_API_BASE_URL')
   const response = await fetch(`${API_BASE}${path}`, {
     headers: {
       'Content-Type': 'application/json',
@@ -24,8 +26,14 @@ async function request(path, options = {}) {
     ...options,
   })
   if (!response.ok) {
-    const text = await response.text()
-    throw new Error(text || `HTTP ${response.status}`)
+    let message = ''
+    try {
+      const body = await response.json()
+      message = body?.detail || body?.message || JSON.stringify(body)
+    } catch {
+      message = await response.text()
+    }
+    throw new Error(message || `HTTP ${response.status}`)
   }
   if (response.status === 204) return null
   return response.json()
