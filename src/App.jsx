@@ -10,6 +10,7 @@ import {
 } from './api/client.js'
 import CompanyDecisionOverlay from './components/CompanyDecisionOverlay.jsx'
 import EndingScreen from './components/EndingScreen.jsx'
+import MarketMacroStatus from './components/MarketMacroStatus.jsx'
 import P1FeatureCenter from './components/P1FeatureCenter.jsx'
 import P1LifeCenter from './components/P1LifeCenter.jsx'
 import MarketTerminal from './components/MarketTerminal.jsx'
@@ -137,6 +138,7 @@ function GameShell({ player, onExit, onPlayerChange }) {
   }, [key])
 
   const tutorialState = featureState?.tutorial || null
+  const safety = featureState?.safety || null
   const tutorialActive = Boolean(player.tutorial) && (tutorialState ? Boolean(tutorialState.active && !tutorialState.completed) : true)
   const lifeLocked = tutorialActive && !Boolean(tutorialState?.lifeModeUnlocked)
   const timeLocked = tutorialActive && !Boolean(tutorialState?.timeAdvanceUnlocked)
@@ -152,7 +154,9 @@ function GameShell({ player, onExit, onPlayerChange }) {
       <button type="button" disabled={lifeLocked} className={`ghost-button ${lifeLocked ? 'locked' : ''} ${mode === 'life' ? 'active' : ''}`} onClick={() => setMode('life')}>👤 人生／經營</button>
       <button type="button" disabled={lifeLocked} className={`ghost-button ${lifeLocked ? 'locked' : ''} ${mode === 'feature' ? 'active' : ''}`} onClick={() => setMode('feature')}>🏠 資產／健康／生涯</button>
       <button type="button" className="ghost-button safety-entry" onClick={() => setSafetyOpen(true)}>⚙ 安全／自動化</button>
+      {safety && <span className={`safety-dock-state ${safety.emergencyMedical ? 'safe' : 'warn'}`}>🛡 {safety.emergencyMedical ? '生命保護 ON' : '生命保護 OFF'}・長快轉 {safety.longAdvancePolicy === 'pause' ? '遇事暫停' : safety.longAdvancePolicy === 'ignore' ? '自動忽略' : '保守自動'}</span>}
     </div>
+    <MarketMacroStatus active={mode === 'market'} />
     <TutorialCoach mode={mode} onGoLife={() => { if (!lifeLocked) setMode('life') }} />
     <CompanyDecisionOverlay />
     <SafetyAutomationCenter open={safetyOpen} onClose={() => setSafetyOpen(false)} />
