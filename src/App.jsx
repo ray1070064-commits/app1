@@ -78,7 +78,7 @@ function LaunchScreen({ onStart }) {
 
   return <main className="launch-shell">
     <section className="launch-hero">
-      <div><div className="eyebrow">LIFE × MARKET</div><h1>資本人生</h1><p>在市場裡累積資本，在時間裡承擔選擇。</p></div>
+      <div><div className="eyebrow">LIFE × MARKET</div><h1>資本人生 Capital Life AI生成</h1><p>在市場裡累積資本，在時間裡承擔選擇。</p></div>
       <div className="market-tags" aria-label="市場類型"><span>股票</span><span>ETF</span><span>加密</span><span>商品</span><span>外匯</span></div>
     </section>
 
