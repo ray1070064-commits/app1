@@ -111,7 +111,13 @@ function GameShell({ player, onExit, onPlayerChange }) {
   const [mode, setMode] = useState('market')
   const key = useMemo(() => player.gameId || 'game', [player.gameId])
   if (mode === 'life') return <LifeCenter key={`life-${key}`} player={player} onMarket={() => setMode('market')} onExit={onExit} onRestored={(result) => onPlayerChange(resultToPlayer(result))} />
-  return <MarketTerminal key={`market-${key}`} player={player} onLife={() => setMode('life')} onExit={onExit} />
+  return <>
+    <div className="game-mode-dock" aria-label="遊戲模式">
+      <button type="button" className="ghost-button active">📈 市場</button>
+      <button type="button" className="ghost-button" onClick={() => setMode('life')}>👤 人生／經營</button>
+    </div>
+    <MarketTerminal key={`market-${key}`} player={player} onExit={onExit} />
+  </>
 }
 
 export default function App() {
