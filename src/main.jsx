@@ -7,6 +7,7 @@ import './info.css'
 import './life.css'
 import './deep-life.css'
 import './feature.css'
+import './tutorial.css'
 
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>
