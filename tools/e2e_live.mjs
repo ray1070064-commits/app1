@@ -49,19 +49,21 @@ try {
   console.log('✓ GitHub Pages launch screen')
 
   // 2. Create a real backend game through the UI (tests CORS + POST + X-Game-Id setup).
-  const createPromise = waitJsonResponse('/api/v1/games', 'POST')
-  await page.getByRole('button', { name: '進入市場' }).click()
-  const created = await createPromise
+  const [created] = await Promise.all([
+    waitJsonResponse('/api/v1/games', 'POST'),
+    page.getByRole('button', { name: '進入市場', exact: true }).click(),
+  ])
   assert.ok(created.body?.gameId, 'create game did not return gameId')
   const firstGameId = created.body.gameId
   await page.getByText('下單', { exact: true }).waitFor({ timeout: 90_000 })
-  await page.getByRole('button', { name: '👤 人生／經營' }).waitFor()
+  await page.getByRole('button', { name: '👤 人生／經營', exact: true }).waitFor()
   console.log(`✓ New game created (${firstGameId.slice(0, 8)}…)`)
 
   // 3. Buy one unit using the actual Spot market-order UI.
-  const orderPromise = waitJsonResponse('/api/v1/orders', 'POST')
-  await page.getByRole('button', { name: '確認買入' }).click()
-  const order = await orderPromise
+  const [order] = await Promise.all([
+    waitJsonResponse('/api/v1/orders', 'POST'),
+    page.getByRole('button', { name: '確認買入', exact: true }).click(),
+  ])
   assert.equal(order.body?.ok, true)
   const positions = order.body?.positions || order.body?.snapshot?.positions || []
   assert.ok(Array.isArray(positions), 'order response did not contain positions array')
@@ -72,9 +74,10 @@ try {
   const beforeText = await dayText.textContent()
   const beforeDay = Number((beforeText || '').match(/\d+/)?.[0] || 0)
   assert.ok(beforeDay >= 1, `could not read initial day from ${beforeText}`)
-  const advancePromise = waitJsonResponse('/api/v1/time/advance', 'POST')
-  await page.getByRole('button', { name: '+1 日' }).click()
-  const advanced = await advancePromise
+  const [advanced] = await Promise.all([
+    waitJsonResponse('/api/v1/time/advance', 'POST'),
+    page.getByRole('button', { name: '+1 日', exact: true }).click(),
+  ])
   assert.equal(advanced.body?.ok, true)
   assert.equal(advanced.body?.currentDay, beforeDay + 1)
   await page.waitForFunction(expected => {
@@ -84,8 +87,8 @@ try {
   console.log(`✓ GameDay advance Day ${beforeDay} → ${beforeDay + 1}`)
 
   // 5. Enter the real life/management center and verify all seven sections exist.
-  await page.getByRole('button', { name: '👤 人生／經營' }).click()
-  await page.getByRole('button', { name: '總覽' }).waitFor({ timeout: 90_000 })
+  await page.getByRole('button', { name: '👤 人生／經營', exact: true }).click()
+  await page.getByRole('button', { name: '總覽', exact: true }).waitFor({ timeout: 90_000 })
   for (const label of ['總覽', '職涯', '家庭', '公司', '權力／風險', '人生記憶', '存檔']) {
     assert.equal(await page.getByRole('button', { name: label, exact: true }).count(), 1, `missing life tab: ${label}`)
   }
@@ -95,9 +98,10 @@ try {
   // 6. Save the authoritative GameState through FastAPI and verify localStorage.
   await page.getByRole('button', { name: '存檔', exact: true }).click()
   await page.getByText('瀏覽器存檔', { exact: true }).waitFor()
-  const savePromise = waitJsonResponse('/api/v1/save/export', 'GET')
-  await page.getByRole('button', { name: '立即保存' }).click()
-  const saved = await savePromise
+  const [saved] = await Promise.all([
+    waitJsonResponse('/api/v1/save/export', 'GET'),
+    page.getByRole('button', { name: '立即保存', exact: true }).click(),
+  ])
   assert.equal(saved.body?.ok, true)
   assert.ok(String(saved.body?.code || '').startsWith('CL181.'), 'save code does not use CL181 format')
   await page.getByText('已保存到這個瀏覽器', { exact: true }).waitFor()
@@ -108,14 +112,15 @@ try {
 
   // 7. Simulate a fresh page load. The launch screen must detect the local save.
   await page.reload({ waitUntil: 'domcontentloaded', timeout: 90_000 })
-  await page.getByRole('heading', { name: '歡迎回來' }).waitFor({ timeout: 90_000 })
-  await page.getByRole('button', { name: '▶ 繼續這段人生' }).waitFor()
+  await page.getByRole('heading', { name: '歡迎回來', exact: true }).waitFor({ timeout: 90_000 })
+  await page.getByRole('button', { name: '▶ 繼續這段人生', exact: true }).waitFor()
   console.log('✓ Reload detects browser save')
 
   // 8. Restore into a new backend session and verify the saved day survives.
-  const restorePromise = waitJsonResponse('/api/v1/save/restore', 'POST')
-  await page.getByRole('button', { name: '▶ 繼續這段人生' }).click()
-  const restored = await restorePromise
+  const [restored] = await Promise.all([
+    waitJsonResponse('/api/v1/save/restore', 'POST'),
+    page.getByRole('button', { name: '▶ 繼續這段人生', exact: true }).click(),
+  ])
   assert.equal(restored.body?.ok, true)
   assert.ok(restored.body?.gameId, 'restore did not return gameId')
   assert.notEqual(restored.body.gameId, firstGameId, 'restore should create a new backend session id')
