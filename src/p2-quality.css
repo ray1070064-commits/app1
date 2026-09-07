@@ -1,0 +1,128 @@
+/* P2 quality layer: interaction feedback, accessibility and long-session polish. */
+
+:root {
+  --p2-focus: rgba(125, 211, 252, .82);
+  --p2-soft: rgba(255, 255, 255, .055);
+  --p2-border: rgba(148, 163, 184, .2);
+}
+
+button,
+input,
+select,
+textarea {
+  transition: border-color .16s ease, background-color .16s ease, opacity .16s ease, transform .12s ease;
+}
+
+button:not(:disabled):active {
+  transform: translateY(1px);
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--p2-focus);
+  outline-offset: 2px;
+}
+
+button:disabled {
+  opacity: .54;
+  cursor: not-allowed;
+}
+
+/* Make the configured start-money bounds visible instead of hiding them in HTML attributes. */
+.setup-card .form-grid > label:first-child {
+  position: relative;
+  padding-bottom: 20px;
+}
+
+.setup-card .form-grid > label:first-child::after {
+  content: "最小 $10,000　·　最大 $500,000";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  font-size: 11px;
+  color: var(--muted, #94a3b8);
+  letter-spacing: .01em;
+}
+
+.quick-card .quick-stats::after {
+  content: "隨機起始資金範圍：$50,000 ～ $200,000";
+  grid-column: 1 / -1;
+  display: block;
+  margin-top: 2px;
+  font-size: 11px;
+  color: var(--muted, #94a3b8);
+}
+
+/* Long advances are synchronous by design. Give immediate feedback so the UI never looks dead. */
+.advance-controls {
+  position: relative;
+}
+
+.advance-controls:has(button:disabled)::after {
+  content: "模擬中… 長時間推進使用精簡快速模式";
+  position: absolute;
+  top: calc(100% + 7px);
+  right: 0;
+  z-index: 25;
+  min-width: 220px;
+  padding: 7px 10px;
+  border: 1px solid var(--p2-border);
+  border-radius: 8px;
+  background: rgba(15, 23, 42, .96);
+  color: #e2e8f0;
+  font-size: 11px;
+  line-height: 1.35;
+  box-shadow: 0 10px 28px rgba(0, 0, 0, .28);
+  pointer-events: none;
+}
+
+.advance-controls:has(button:disabled) button {
+  cursor: progress;
+}
+
+/* Dense screens: keep important controls readable without adding more panels. */
+.terminal-topbar,
+.macro-strip,
+.game-mode-dock {
+  backdrop-filter: blur(10px);
+}
+
+.life-notice,
+.parity-notice,
+.launch-error {
+  overflow-wrap: anywhere;
+}
+
+.watch-row-wrap,
+.feature-card,
+.life-card,
+.panel {
+  contain: layout paint;
+}
+
+@media (max-width: 900px) {
+  .advance-controls:has(button:disabled)::after {
+    position: fixed;
+    top: auto;
+    right: 14px;
+    bottom: 14px;
+    left: 14px;
+    min-width: 0;
+    text-align: center;
+  }
+
+  .setup-card .form-grid > label:first-child {
+    padding-bottom: 22px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+  }
+}
