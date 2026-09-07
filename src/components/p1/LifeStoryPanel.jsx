@@ -9,6 +9,8 @@ import {
 } from '../../api/client.js'
 import { ActionButton, Section, money } from './P1Ui.jsx'
 
+const POLICY_LABELS = { pause: '遇到決策就暫停', safe: '保守自動處理', ignore: '自動忽略' }
+
 export function LifeStoryPanel({ life, busy, run }) {
   const pending = life.pendingEvent
   return <div className="life-stack">
@@ -18,9 +20,8 @@ export function LifeStoryPanel({ life, busy, run }) {
       <div className="choice-grid">{(pending.choices || []).map((choice, index) => <button type="button" className="choice-card" disabled={busy} key={`${choice.label}-${index}`} onClick={() => run(lifeAction, 'resolve', { choiceIndex: index })}><strong>{choice.label}</strong><span>{choice.result || ''}</span><small>現金 {money(choice.cash || 0)}｜健康 {Number(choice.health || 0) >= 0 ? '+' : ''}{choice.health || 0}｜壓力 {Number(choice.stress || 0) >= 0 ? '+' : ''}{choice.stress || 0}｜XP {choice.xp || 0}</small></button>)}</div>
     </Section> : <Section title="人生事件"><div className="empty-state">目前沒有待處理事件；市場與人生仍會隨時間累積故事。</div></Section>}
 
-    <Section title="自動處理策略">
-      <div className="life-action-row wrap"><ActionButton disabled={busy} onClick={() => run(lifeAction, 'set_auto_policy', { policy: 'pause', cashReserve: life.cashReserve || 0 })}>暫停等待</ActionButton><ActionButton disabled={busy} onClick={() => run(lifeAction, 'set_auto_policy', { policy: 'safe', cashReserve: life.cashReserve || 0 })}>保守自動</ActionButton><ActionButton disabled={busy} onClick={() => run(lifeAction, 'set_auto_policy', { policy: 'ignore', cashReserve: life.cashReserve || 0 })}>自動忽略</ActionButton></div>
-      <div className="deep-note">目前：{life.autoPolicy || 'pause'}｜保留現金 {money(life.cashReserve)}</div>
+    <Section title="事件處理方式">
+      <div className="deep-note">目前一般人生事件：<strong>{POLICY_LABELS[life.autoPolicy] || life.autoPolicy || '遇到決策就暫停'}</strong>｜保留現金 {money(life.cashReserve)}。為避免攸關時間推進的設定散落各頁，修改方式已統一移到畫面上方的「⚙ 安全／自動化」。</div>
     </Section>
 
     <Section title="長期人生記憶"><div className="record-list">{life.memories?.length ? life.memories.map((memory) => <div className="record-row" key={memory.key}><div><strong>{memory.label}</strong><span>{memory.status === 'active' ? '延續中' : '已完成'}・Stage {memory.stage}</span></div><p>{memory.summary}</p><small>開始 Day {memory.startedDay}・最近 Day {memory.lastDay}</small></div>) : <div className="empty-state">故事還在累積</div>}</div></Section>
