@@ -1,0 +1,433 @@
+.market-tools-block {
+  margin: 10px 12px 2px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(145,168,225,.08);
+}
+
+.market-tool-card,
+.feature-card {
+  border: 1px solid rgba(145,168,225,.08);
+  background: rgba(255,255,255,.022);
+  border-radius: 12px;
+}
+
+.market-tool-card {
+  padding: 10px;
+  margin-top: 8px;
+}
+
+.market-tool-heading,
+.feature-card-title,
+.feature-asset-head,
+.feature-record {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.market-tool-heading > div,
+.feature-asset-head > div {
+  min-width: 0;
+}
+
+.market-tool-heading strong,
+.market-tool-heading small,
+.feature-asset-head strong,
+.feature-asset-head span {
+  display: block;
+}
+
+.market-tool-heading small,
+.feature-asset-head span,
+.feature-record span,
+.feature-badge span,
+.feature-title span,
+.feature-title small,
+.feature-asset-meta,
+.feature-metric small,
+.tool-summary,
+.tool-empty {
+  color: #7786a2;
+}
+
+.market-tool-heading small,
+.feature-asset-head span,
+.feature-record span,
+.feature-badge small,
+.feature-title span,
+.feature-title small,
+.feature-metric small,
+.tool-summary,
+.tool-empty {
+  font-size: .7rem;
+}
+
+.tool-status {
+  padding: 3px 7px;
+  border-radius: 999px;
+  font-size: .65rem;
+  color: #8190aa;
+  background: rgba(255,255,255,.04);
+}
+
+.tool-status.active {
+  color: #63dbae;
+  background: rgba(36,177,125,.12);
+}
+
+.tool-grid,
+.feature-auto-grid {
+  display: grid;
+  gap: 7px;
+  margin-top: 9px;
+}
+
+.tool-grid.two { grid-template-columns: 1fr 1fr; }
+.tool-grid.three { grid-template-columns: repeat(3, 1fr); }
+
+.tool-grid label > span,
+.feature-auto-grid label > span {
+  display: block;
+  color: #7d8ba5;
+  font-size: .68rem;
+  margin-bottom: 4px;
+}
+
+.tool-grid input,
+.tool-grid select,
+.feature-auto-grid input {
+  margin-top: 0;
+  padding: 8px 9px;
+  min-height: 36px;
+}
+
+.tool-actions,
+.feature-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 9px;
+}
+
+.tool-actions button,
+.tool-side-tabs button,
+.feature-actions button,
+.feature-record button,
+.feature-auto-grid > button,
+.retire-button {
+  border: 1px solid rgba(149,172,231,.13);
+  color: #b9c6df;
+  background: rgba(255,255,255,.035);
+  border-radius: 9px;
+  padding: 7px 10px;
+}
+
+.tool-actions button:first-child,
+.feature-actions button:first-child {
+  color: #cfd9ff;
+  background: rgba(77,112,209,.13);
+}
+
+.tool-side-tabs {
+  display: flex;
+  gap: 5px;
+  margin-top: 9px;
+}
+
+.tool-side-tabs button.active {
+  color: #dce6ff;
+  background: rgba(75,111,210,.22);
+  border-color: rgba(102,139,241,.3);
+}
+
+.tool-summary,
+.tool-empty {
+  margin-top: 8px;
+  line-height: 1.45;
+}
+
+.tool-notice {
+  margin-top: 8px;
+  padding: 8px 9px;
+  border-radius: 9px;
+  color: #78d9b2;
+  background: rgba(33,171,120,.09);
+  font-size: .72rem;
+}
+
+.feature-shell {
+  width: min(1660px, calc(100% - 24px));
+}
+
+.feature-layout {
+  display: grid;
+  grid-template-columns: 190px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+}
+
+.feature-nav {
+  position: sticky;
+  top: 10px;
+  display: grid;
+  gap: 6px;
+  padding: 10px;
+  border: 1px solid rgba(145,168,225,.12);
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(17,25,44,.96), rgba(10,15,27,.96));
+}
+
+.feature-nav button {
+  text-align: left;
+  padding: 10px 11px;
+  border-radius: 9px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #8492aa;
+}
+
+.feature-nav button.active {
+  color: #e8efff;
+  background: rgba(80,116,216,.14);
+  border-color: rgba(102,139,241,.18);
+}
+
+.feature-content {
+  min-width: 0;
+}
+
+.feature-stack {
+  display: grid;
+  gap: 10px;
+}
+
+.feature-metric-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.feature-metric {
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid rgba(145,168,225,.08);
+  border-radius: 12px;
+  background: rgba(255,255,255,.022);
+}
+
+.feature-metric span,
+.feature-metric strong,
+.feature-metric small {
+  display: block;
+}
+
+.feature-metric span {
+  color: #7786a2;
+  font-size: .72rem;
+}
+
+.feature-metric strong {
+  margin-top: 4px;
+  font-size: 1rem;
+}
+
+.feature-card {
+  padding: 12px;
+}
+
+.feature-card-title {
+  margin-bottom: 10px;
+}
+
+.feature-card-title h3 {
+  margin: 0;
+  font-size: .92rem;
+}
+
+.feature-card-title > span {
+  color: #7d8ba5;
+  font-size: .72rem;
+}
+
+.feature-asset-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.feature-asset-card {
+  min-width: 0;
+  padding: 11px;
+  border-radius: 11px;
+  background: rgba(255,255,255,.018);
+  border: 1px solid rgba(145,168,225,.06);
+}
+
+.feature-asset-card p,
+.challenge-card p,
+.retirement-card p {
+  color: #8b98af;
+  line-height: 1.5;
+  font-size: .76rem;
+}
+
+.feature-asset-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px 10px;
+  font-size: .68rem;
+}
+
+.feature-actions.large button {
+  flex: 1;
+  min-height: 42px;
+}
+
+.feature-auto-grid {
+  grid-template-columns: 1.2fr 1fr 1fr auto;
+  align-items: end;
+}
+
+.feature-record-list {
+  display: grid;
+  gap: 6px;
+}
+
+.feature-record {
+  padding: 9px 10px;
+  border-radius: 9px;
+  background: rgba(255,255,255,.02);
+}
+
+.feature-record strong,
+.feature-record span {
+  display: block;
+}
+
+.feature-badge-grid,
+.feature-title-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.feature-badge,
+.feature-title {
+  min-width: 0;
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(145,168,225,.06);
+  background: rgba(255,255,255,.018);
+  text-align: left;
+}
+
+.feature-badge strong,
+.feature-badge span,
+.feature-badge small,
+.feature-title strong,
+.feature-title span,
+.feature-title small,
+.feature-title b {
+  display: block;
+}
+
+.feature-badge span,
+.feature-title small {
+  margin-top: 4px;
+  line-height: 1.45;
+}
+
+.feature-badge.unlocked,
+.feature-title.unlocked {
+  border-color: rgba(91,133,244,.18);
+  background: rgba(70,103,193,.075);
+}
+
+.feature-title.selected {
+  box-shadow: inset 2px 0 #6d8dff;
+}
+
+.feature-title:disabled:not(.unlocked) {
+  opacity: .45;
+}
+
+.feature-title b {
+  margin-top: 6px;
+  color: #8facff;
+  font-size: .66rem;
+}
+
+.challenge-card h2 {
+  margin: 2px 0 4px;
+  font-size: 1.05rem;
+}
+
+.challenge-status {
+  padding: 9px 10px;
+  border-radius: 9px;
+  background: rgba(255,255,255,.025);
+  color: #9ba8bd;
+  font-size: .74rem;
+}
+
+.challenge-status.done {
+  color: #67dbae;
+  background: rgba(36,177,125,.1);
+}
+
+.retire-button {
+  width: 100%;
+  min-height: 44px;
+  color: #ffd5d9;
+  border-color: rgba(232,81,100,.16);
+  background: rgba(201,54,73,.12);
+}
+
+.retirement-result {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 15px;
+  border-radius: 12px;
+  background: rgba(79,110,196,.09);
+}
+
+.retirement-result strong {
+  font-size: 2rem;
+  color: #a9bdff;
+}
+
+.retirement-result span {
+  font-size: 1rem;
+}
+
+.retirement-result small {
+  margin-left: auto;
+  color: #7d8ba5;
+}
+
+.feature-gameover {
+  margin-bottom: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  color: #ffc0c7;
+  background: rgba(201,54,73,.1);
+  border: 1px solid rgba(232,81,100,.13);
+}
+
+@media (max-width: 1050px) {
+  .feature-layout { grid-template-columns: 1fr; }
+  .feature-nav { position: static; grid-template-columns: repeat(5, minmax(0, 1fr)); overflow-x: auto; }
+  .feature-nav button { text-align: center; white-space: nowrap; }
+  .feature-metric-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .feature-asset-grid, .feature-badge-grid, .feature-title-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .feature-auto-grid { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 650px) {
+  .tool-grid.two, .tool-grid.three, .feature-metric-grid, .feature-asset-grid, .feature-badge-grid, .feature-title-grid, .feature-auto-grid { grid-template-columns: 1fr; }
+  .feature-nav { display: flex; }
+  .feature-nav button { min-width: 115px; }
+  .retirement-result { align-items: flex-start; flex-direction: column; }
+  .retirement-result small { margin-left: 0; }
+}
