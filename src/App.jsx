@@ -43,7 +43,7 @@ function LaunchScreen({ onStart }) {
     try {
       const result = await createGame(payload)
       if (!result?.ok) throw new Error(result?.message || '建立遊戲失敗')
-      onStart({ ...payload, gameId: result.gameId || null })
+      onStart({ ...payload, gameId: result.gameId || null, snapshot: result.snapshot || null })
     } catch (cause) {
       setError(cause.message || '建立遊戲失敗')
     } finally {
@@ -117,24 +117,11 @@ function LaunchScreen({ onStart }) {
           <div className="form-grid">
             <label>
               <span>起始資金</span>
-              <input
-                type="number"
-                min="10000"
-                max="500000"
-                step="5000"
-                value={custom.balance}
-                onChange={(event) => setCustom({ ...custom, balance: Number(event.target.value) })}
-              />
+              <input type="number" min="10000" max="500000" step="5000" value={custom.balance} onChange={(event) => setCustom({ ...custom, balance: Number(event.target.value) })} />
             </label>
             <label>
               <span>起始年齡</span>
-              <input
-                type="number"
-                min="18"
-                max="60"
-                value={custom.age}
-                onChange={(event) => setCustom({ ...custom, age: Number(event.target.value) })}
-              />
+              <input type="number" min="18" max="60" value={custom.age} onChange={(event) => setCustom({ ...custom, age: Number(event.target.value) })} />
             </label>
           </div>
 
@@ -147,12 +134,7 @@ function LaunchScreen({ onStart }) {
 
           <label className="field-block">
             <span>世界 Seed</span>
-            <input
-              type="text"
-              value={custom.seed}
-              placeholder="留空代表隨機"
-              onChange={(event) => setCustom({ ...custom, seed: event.target.value })}
-            />
+            <input type="text" value={custom.seed} placeholder="留空代表隨機" onChange={(event) => setCustom({ ...custom, seed: event.target.value })} />
           </label>
 
           <label className="toggle-row">
@@ -185,7 +167,6 @@ function LaunchScreen({ onStart }) {
 
 export default function App() {
   const [player, setPlayer] = useState(null)
-
   if (!player) return <LaunchScreen onStart={setPlayer} />
   return <MarketTerminal player={player} onExit={() => setPlayer(null)} />
 }
