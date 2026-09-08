@@ -46,10 +46,21 @@ function storeEncryptedSave(saveCode) {
   }));
 }
 
+async function exportSaveSilently() {
+  const loadingRoot = document.getElementById('global-loading');
+  const wasHidden = loadingRoot ? loadingRoot.hidden : false;
+  if (loadingRoot) loadingRoot.hidden = true;
+  try {
+    return await exportEncryptedBrowserSave();
+  } finally {
+    if (loadingRoot) loadingRoot.hidden = wasHidden;
+  }
+}
+
 export async function persistEncryptedBrowserSave() {
   if (autosaveInFlight) return autosaveInFlight;
   autosaveInFlight = (async () => {
-    const payload = await exportEncryptedBrowserSave();
+    const payload = await exportSaveSilently();
     storeEncryptedSave(payload?.save_code);
     return payload;
   })();
