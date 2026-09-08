@@ -5,7 +5,9 @@ on:
     branches:
       - main
     paths:
-      - 'index.html'
+      - '*.html'
+      - '*.xml'
+      - 'robots.txt'
       - '.nojekyll'
       - 'manifest.webmanifest'
       - 'css/**'
