@@ -16,6 +16,7 @@ const initialState = {
     orderType: 'market',
     leverage: 1,
     orderQuantity: 1,
+    endGameConfirm: false,
     legacy: null,
     chart: null,
     startup: null,
@@ -26,6 +27,7 @@ const initialState = {
     powerPanel: null,
     newsPanel: null,
     progressPanel: null,
+    settlementPanel: null,
   },
   server: null,
   connected: false,
@@ -56,6 +58,10 @@ export function setServerState(serverState) {
   state.server = serverState || null;
   if (!state.ui.selectedSymbol && serverState?.market?.selected_symbol) {
     state.ui.selectedSymbol = serverState.market.selected_symbol;
+  }
+  if (serverState?.world?.game_over) {
+    state.ui.activeView = 'settlement';
+    state.ui.endGameConfirm = false;
   }
   emit();
 }
@@ -97,6 +103,11 @@ export function setNewsPanel(payload) {
 
 export function setProgressPanel(payload) {
   state.ui.progressPanel = payload || null;
+  emit();
+}
+
+export function setSettlementPanel(payload) {
+  state.ui.settlementPanel = payload || null;
   emit();
 }
 
