@@ -1,0 +1,14 @@
+.save-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; }
+.save-stack { display:grid; gap:12px; }
+.save-toggle-row { display:flex; align-items:flex-start; gap:10px; padding:12px; border:1px solid var(--line); border-radius:10px; background:rgba(255,255,255,.025); }
+.save-toggle-row span { display:grid; gap:3px; }
+.save-toggle-row small { color:var(--muted); }
+.save-meta { padding:10px 12px; border-radius:9px; background:rgba(255,255,255,.025); color:var(--muted); font-size:13px; }
+.save-meta.has-save { color:var(--text); }
+.save-warning { padding:11px 12px; border:1px solid rgba(255,190,80,.35); border-radius:10px; background:rgba(255,190,80,.08); font-size:13px; line-height:1.55; }
+.save-code-area { width:100%; min-height:112px; resize:vertical; font-family:ui-monospace,SFMono-Regular,Consolas,monospace; font-size:12px; line-height:1.45; word-break:break-all; }
+.legacy-save-panel .button-row { flex-wrap:wrap; }
+
+@media (max-width: 980px) {
+  .save-grid { grid-template-columns:1fr; }
+}
