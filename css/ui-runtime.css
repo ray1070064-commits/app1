@@ -91,8 +91,8 @@
 }
 .global-loading.is-visible .global-loading-spinner {
   animation:
-    capital-life-spinner-reveal .01s linear .9s forwards,
-    capital-life-spin .78s linear .9s infinite;
+    capital-life-spinner-reveal .01s linear 2s forwards,
+    capital-life-spin .78s linear 2s infinite;
 }
 .global-loading-copy {
   min-width: 0;
