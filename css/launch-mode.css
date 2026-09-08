@@ -1,0 +1,22 @@
+body:has(.launch-screen) .topbar,
+body:has(.launch-screen) .sidebar {
+  display: none !important;
+}
+
+body:has(.launch-screen) .workspace {
+  display: block;
+  min-height: 100vh;
+}
+
+body:has(.launch-screen) .main-stage {
+  min-height: 100vh;
+  padding: 0 !important;
+}
+
+body:has(.launch-screen) .backend-banner {
+  display: none !important;
+}
+
+body:has(.launch-screen) .view-root {
+  min-height: 100vh;
+}
