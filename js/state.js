@@ -19,6 +19,7 @@ const initialState = {
     lifePanel: null,
     familyPanel: null,
     companyPanel: null,
+    powerPanel: null,
   },
   server: null,
   connected: false,
@@ -70,6 +71,11 @@ export function setFamilyPanel(payload) {
 
 export function setCompanyPanel(payload) {
   state.ui.companyPanel = payload || null;
+  emit();
+}
+
+export function setPowerPanel(payload) {
+  state.ui.powerPanel = payload || null;
   emit();
 }
 
