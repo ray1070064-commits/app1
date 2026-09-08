@@ -116,6 +116,10 @@ export async function loadFamilyPanel() {
   return request('/family', { method: 'GET' });
 }
 
+export async function loadCompanyPanel() {
+  return request('/company', { method: 'GET' });
+}
+
 export async function loadGameState(includeUi = false) {
   return request(`/state?include_ui=${includeUi ? 'true' : 'false'}`, { method: 'GET' });
 }
