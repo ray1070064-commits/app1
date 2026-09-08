@@ -108,6 +108,10 @@ export async function loadStartupConfig() {
   return request('/startup', { method: 'GET' });
 }
 
+export async function loadLifePanel() {
+  return request('/life', { method: 'GET' });
+}
+
 export async function loadGameState(includeUi = false) {
   return request(`/state?include_ui=${includeUi ? 'true' : 'false'}`, { method: 'GET' });
 }
