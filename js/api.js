@@ -140,6 +140,24 @@ export async function loadSettlementPanel() {
   return request('/settlement', { method: 'GET' });
 }
 
+export async function loadSaveTools() {
+  return request('/save-tools', { method: 'GET' });
+}
+
+export async function exportLegacySave() {
+  return request('/legacy-save/export', { method: 'POST' });
+}
+
+export async function importLegacySave({ saveCode = null, fileBase64 = null } = {}) {
+  return request('/legacy-save/import', {
+    method: 'POST',
+    body: JSON.stringify({
+      save_code: saveCode == null ? null : String(saveCode),
+      file_base64: fileBase64 == null ? null : String(fileBase64),
+    }),
+  });
+}
+
 export async function loadGameState(includeUi = false) {
   return request(`/state?include_ui=${includeUi ? 'true' : 'false'}`, { method: 'GET' });
 }
