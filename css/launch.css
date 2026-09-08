@@ -219,6 +219,7 @@ body.launch-mode .view-root {
 .launch-field {
   display: grid;
   gap: 7px;
+  align-content: start;
 }
 .launch-field-wide {
   grid-column: 1 / -1;
@@ -233,6 +234,13 @@ body.launch-mode .view-root {
   color: var(--muted);
   font-size: 10px;
   font-weight: 500;
+}
+.launch-field .launch-range {
+  margin: -1px 1px 0;
+  color: #728198;
+  font-size: 9.5px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: .01em;
 }
 .launch-card .input,
 .launch-card .select {
