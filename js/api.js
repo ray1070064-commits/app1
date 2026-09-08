@@ -136,6 +136,10 @@ export async function loadProgressPanel() {
   return request('/progress', { method: 'GET' });
 }
 
+export async function loadSettlementPanel() {
+  return request('/settlement', { method: 'GET' });
+}
+
 export async function loadGameState(includeUi = false) {
   return request(`/state?include_ui=${includeUi ? 'true' : 'false'}`, { method: 'GET' });
 }
