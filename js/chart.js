@@ -1,4 +1,20 @@
-export function drawMarketChart(payload) {
+function movingAverage(values, period) {
+  const out = new Array(values.length).fill(null);
+  let sum = 0;
+  for (let i = 0; i < values.length; i += 1) {
+    const value = Number(values[i]);
+    if (!Number.isFinite(value)) continue;
+    sum += value;
+    if (i >= period) {
+      const old = Number(values[i - period]);
+      if (Number.isFinite(old)) sum -= old;
+    }
+    if (i >= period - 1) out[i] = sum / period;
+  }
+  return out;
+}
+
+export function drawMarketChart(payload, ui = {}) {
   const host = document.querySelector('.chart-box');
   if (!host) return;
 
@@ -20,7 +36,7 @@ export function drawMarketChart(payload) {
   const low = rows.map(row => Number(row.Low ?? row.low));
   const close = rows.map(row => Number(row.Close ?? row.close));
 
-  window.Plotly.react('market-candlestick', [{
+  const traces = [{
     type: 'candlestick',
     x,
     open,
@@ -28,7 +44,23 @@ export function drawMarketChart(payload) {
     low,
     close,
     name: String(payload?.symbol || ''),
-  }], {
+  }];
+
+  const indicators = ui?.indicators || {};
+  for (const [key, period] of [['ma20', 20], ['ma50', 50], ['ma200', 200]]) {
+    if (!indicators[key]) continue;
+    traces.push({
+      type: 'scatter',
+      mode: 'lines',
+      x,
+      y: movingAverage(close, period),
+      name: `MA${period}`,
+      line: { width: 1.5 },
+      hovertemplate: `MA${period}: %{y:.4f}<extra></extra>`,
+    });
+  }
+
+  window.Plotly.react('market-candlestick', traces, {
     autosize: true,
     margin: { l: 56, r: 24, t: 18, b: 42 },
     paper_bgcolor: 'rgba(0,0,0,0)',
@@ -46,7 +78,8 @@ export function drawMarketChart(payload) {
       fixedrange: false,
     },
     dragmode: 'pan',
-    showlegend: false,
+    showlegend: traces.length > 1,
+    legend: { orientation: 'h' },
   }, {
     responsive: true,
     displaylogo: false,
