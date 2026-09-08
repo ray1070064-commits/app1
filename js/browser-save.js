@@ -1,10 +1,11 @@
-import { exportEncryptedBrowserSave, importEncryptedBrowserSave } from './api.js';
+import { clearSession, exportEncryptedBrowserSave, importEncryptedBrowserSave } from './api.js';
 
 const SAVE_KEY = 'capital-life-encrypted-save-v1';
 const SAVE_META_KEY = 'capital-life-encrypted-save-meta-v1';
 let autosaveTimer = null;
 let autosaveInFlight = null;
 let autosaveEnabled = true;
+let initialRestoreSkipped = false;
 
 export function hasEncryptedBrowserSave() {
   return Boolean(localStorage.getItem(SAVE_KEY));
@@ -72,6 +73,15 @@ export async function persistEncryptedBrowserSave() {
 }
 
 export async function restoreEncryptedBrowserSave() {
+  // The first call happens during application boot. Never auto-restore the
+  // browser save there: start with a fresh backend session and leave the save
+  // untouched until the player explicitly presses the load button.
+  if (!initialRestoreSkipped) {
+    initialRestoreSkipped = true;
+    clearSession();
+    return null;
+  }
+
   const code = localStorage.getItem(SAVE_KEY);
   if (!code) return null;
   try {
