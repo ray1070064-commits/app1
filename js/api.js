@@ -104,45 +104,17 @@ async function request(path, options = {}, retryAuth = true) {
   }
 }
 
-export async function loadStartupConfig() {
-  return request('/startup', { method: 'GET' });
-}
-
-export async function loadMarketPanel() {
-  return request('/market', { method: 'GET' });
-}
-
-export async function loadLifePanel() {
-  return request('/life', { method: 'GET' });
-}
-
-export async function loadFamilyPanel() {
-  return request('/family', { method: 'GET' });
-}
-
-export async function loadCompanyPanel() {
-  return request('/company', { method: 'GET' });
-}
-
-export async function loadPowerPanel() {
-  return request('/power', { method: 'GET' });
-}
-
-export async function loadNewsPanel() {
-  return request('/news', { method: 'GET' });
-}
-
-export async function loadProgressPanel() {
-  return request('/progress', { method: 'GET' });
-}
-
-export async function loadSettlementPanel() {
-  return request('/settlement', { method: 'GET' });
-}
-
-export async function loadSaveTools() {
-  return request('/save-tools', { method: 'GET' });
-}
+export async function loadStartupConfig() { return request('/startup', { method: 'GET' }); }
+export async function loadMarketPanel() { return request('/market', { method: 'GET' }); }
+export async function loadLifePanel() { return request('/life', { method: 'GET' }); }
+export async function loadFamilyPanel() { return request('/family', { method: 'GET' }); }
+export async function loadCompanyPanel() { return request('/company', { method: 'GET' }); }
+export async function loadPowerPanel() { return request('/power', { method: 'GET' }); }
+export async function loadNewsPanel() { return request('/news', { method: 'GET' }); }
+export async function loadPttPanel() { return request('/ptt', { method: 'GET' }); }
+export async function loadProgressPanel() { return request('/progress', { method: 'GET' }); }
+export async function loadSettlementPanel() { return request('/settlement', { method: 'GET' }); }
+export async function loadSaveTools() { return request('/save-tools', { method: 'GET' }); }
 
 export async function exportLegacySave() {
   return request('/legacy-save/export', { method: 'POST' });
@@ -162,9 +134,7 @@ export async function loadGameState(includeUi = false) {
   return request(`/state?include_ui=${includeUi ? 'true' : 'false'}`, { method: 'GET' });
 }
 
-export async function loadLegacyUi() {
-  return request('/ui', { method: 'GET' });
-}
+export async function loadLegacyUi() { return request('/ui', { method: 'GET' }); }
 
 export async function loadChart(symbol, limit = 365) {
   return request(`/chart/${encodeURIComponent(symbol)}?limit=${encodeURIComponent(limit)}`, { method: 'GET' });
@@ -182,9 +152,7 @@ export async function sendGameAction(action, payload = {}, options = {}) {
   });
 }
 
-export async function exportEncryptedBrowserSave() {
-  return request('/browser-save/export', { method: 'POST' });
-}
+export async function exportEncryptedBrowserSave() { return request('/browser-save/export', { method: 'POST' }); }
 
 export async function importEncryptedBrowserSave(saveCode) {
   return request('/browser-save/import', {
@@ -194,10 +162,7 @@ export async function importEncryptedBrowserSave(saveCode) {
 }
 
 export async function saveGame(slot = 'default') {
-  return request('/save', {
-    method: 'POST',
-    body: JSON.stringify({ slot }),
-  });
+  return request('/save', { method: 'POST', body: JSON.stringify({ slot }) });
 }
 
 export async function loadSave(slot = 'default') {
