@@ -31,16 +31,22 @@ function renderHeaderControls(state) {
   if (!show) {
     host.innerHTML = '';
     host.hidden = true;
-    return;
-  }
-  host.hidden = false;
-  if (state.ui.endGameConfirm) {
-    host.innerHTML = `
-      <span class="end-game-warning">確定結束這局？</span>
-      <button class="topbar-action danger" data-settlement-end-confirm>確認</button>
-      <button class="topbar-action" data-settlement-end-cancel>取消</button>`;
   } else {
-    host.innerHTML = '<button class="topbar-action" data-settlement-end-first>結束遊戲</button>';
+    host.hidden = false;
+    if (state.ui.endGameConfirm) {
+      host.innerHTML = `
+        <span class="end-game-warning">確定結束這局？</span>
+        <button class="topbar-action danger" data-settlement-end-confirm>確認</button>
+        <button class="topbar-action" data-settlement-end-cancel>取消</button>`;
+    } else {
+      host.innerHTML = '<button class="topbar-action" data-settlement-end-first>結束遊戲</button>';
+    }
+  }
+
+  // Legacy Streamlit used st.stop() on the settlement screen. Mirror that behavior:
+  // once the run is over, normal navigation is disabled until the player restarts.
+  for (const nav of document.querySelectorAll('.nav-button[data-view]')) {
+    nav.disabled = Boolean(world.game_over);
   }
 }
 
@@ -65,6 +71,7 @@ subscribe(state => {
 });
 
 renderHeaderControls(getState());
+if (getState().server?.world?.game_over) void refreshSettlement();
 
 document.addEventListener('click', async event => {
   if (event.target.closest('[data-settlement-end-first]')) {
@@ -105,6 +112,7 @@ document.addEventListener('click', async event => {
       const startup = await loadStartupConfig();
       setStartup(startup?.startup || null);
       patchUI({ activeView: 'start', endGameConfirm: false, selectedSymbol: null });
+      renderHeaderControls(getState());
       toast('已回到新遊戲設定。', 'success');
     } catch (error) {
       toast(error?.message || '無法重新開始', 'error');
