@@ -31,6 +31,14 @@ async function parseResponse(response) {
   return null;
 }
 
+function normalizeNetworkError(error) {
+  if (error?.name === 'AbortError') return new ApiError('連線逾時，請稍後再試。');
+  if (error instanceof TypeError) {
+    return new ApiError('無法連線到遊戲後端。請重新整理頁面後再試；若持續發生，可能是瀏覽器阻擋跨網域請求。');
+  }
+  return error;
+}
+
 export function clearSession() {
   sessionToken = '';
   sessionStorage.removeItem(SESSION_KEY);
@@ -42,21 +50,27 @@ export async function ensureSession(force = false) {
   if (!force && sessionPromise) return sessionPromise;
 
   sessionPromise = (async () => {
-    const response = await fetch(buildUrl('/session'), {
-      method: 'POST',
-      credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-      cache: 'no-store',
-    });
-    const payload = await parseResponse(response);
-    if (!response.ok) {
-      throw new ApiError(payload?.detail || payload?.message || `無法建立遊戲 Session (${response.status})`, response.status, payload);
+    try {
+      // Session creation deliberately uses a simple cross-origin POST: no JSON body,
+      // no Content-Type header and no third-party cookies. The returned opaque token
+      // is used as Bearer auth for all subsequent API requests.
+      const response = await fetch(buildUrl('/session'), {
+        method: 'POST',
+        credentials: 'omit',
+        cache: 'no-store',
+      });
+      const payload = await parseResponse(response);
+      if (!response.ok) {
+        throw new ApiError(payload?.detail || payload?.message || `無法建立遊戲 Session (${response.status})`, response.status, payload);
+      }
+      const token = String(payload?.session_token || '');
+      if (!token) throw new ApiError('後端沒有回傳遊戲 Session。');
+      sessionToken = token;
+      sessionStorage.setItem(SESSION_KEY, token);
+      return token;
+    } catch (error) {
+      throw normalizeNetworkError(error);
     }
-    const token = String(payload?.session_token || '');
-    if (!token) throw new ApiError('後端沒有回傳遊戲 Session。');
-    sessionToken = token;
-    sessionStorage.setItem(SESSION_KEY, token);
-    return token;
   })();
 
   try {
@@ -75,7 +89,8 @@ async function request(path, options = {}, retryAuth = true) {
 
   try {
     const response = await fetch(buildUrl(path), {
-      credentials: 'include',
+      // Authentication is Bearer-token based; avoid third-party cookies entirely.
+      credentials: 'omit',
       cache: 'no-store',
       ...options,
       headers: authHeaders({
@@ -97,8 +112,7 @@ async function request(path, options = {}, retryAuth = true) {
     }
     return payload;
   } catch (error) {
-    if (error?.name === 'AbortError') throw new ApiError('連線逾時，請稍後再試。');
-    throw error;
+    throw normalizeNetworkError(error);
   } finally {
     clearTimeout(timer);
   }
