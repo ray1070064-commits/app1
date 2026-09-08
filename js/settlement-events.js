@@ -102,12 +102,11 @@ document.addEventListener('click', async event => {
 
   if (event.target.closest('[data-settlement-restart]')) {
     try {
-      // A finished local save would otherwise auto-restore on the next page load.
-      // Clear it only when the player explicitly chooses to start a new life.
-      clearEncryptedBrowserSave();
       const response = await sendGameAction('settlement_restart');
       const nextState = stateFromResponse(response);
       if (nextState) setServerState(nextState);
+      // Only clear the finished local save after the backend confirms the restart.
+      clearEncryptedBrowserSave();
       setSettlementPanel(null);
       const startup = await loadStartupConfig();
       setStartup(startup?.startup || null);
