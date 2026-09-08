@@ -5,25 +5,40 @@ import {
   restoreEncryptedBrowserSave,
   setEncryptedAutosaveEnabled,
 } from './browser-save.js';
-import { getState, setLegacySaveExport, setSaveTools, setServerState } from './state.js';
+import { getState, setLegacySaveExport, setSaveTools, setServerState, subscribe } from './state.js';
 import { toast } from './ui.js';
+
+let initialSyncDone = false;
+let initialSyncInFlight = false;
 
 function stateFromResponse(payload) {
   if (!payload) return null;
   return payload.state || payload.game_state || payload;
 }
 
-async function refreshSaveTools() {
-  if (!getState().connected) return;
+async function refreshSaveTools({ quiet = false } = {}) {
+  if (!getState().connected) return false;
   try {
     const payload = await loadSaveTools();
     const tools = payload?.save_tools || null;
     setSaveTools(tools);
     setEncryptedAutosaveEnabled(tools?.autosave_enabled !== false);
+    return true;
   } catch (error) {
-    toast(error?.message || '無法讀取存檔設定', 'error');
+    if (!quiet) toast(error?.message || '無法讀取存檔設定', 'error');
+    return false;
   }
 }
+
+subscribe(state => {
+  if (initialSyncDone || initialSyncInFlight || !state.connected || !state.server) return;
+  initialSyncInFlight = true;
+  void refreshSaveTools({ quiet: true }).then(ok => {
+    if (ok) initialSyncDone = true;
+  }).finally(() => {
+    initialSyncInFlight = false;
+  });
+});
 
 async function fileToBase64(file) {
   return new Promise((resolve, reject) => {
