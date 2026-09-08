@@ -1,6 +1,7 @@
 import { CONFIG, hasBackendConfig } from './config.js';
 
 const SESSION_KEY = 'capital-life-api-session-v1';
+const LOADING_DELAY_MS = 5000;
 let sessionToken = sessionStorage.getItem(SESSION_KEY) || '';
 let sessionPromise = null;
 let loadingDepth = 0;
@@ -155,7 +156,13 @@ async function request(path, options = {}, retryAuth = true) {
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), Math.max(1000, Number(timeoutMs) || CONFIG.REQUEST_TIMEOUT_MS));
-  beginLoading(loadingLabel, loadingDetail);
+  let loadingStarted = false;
+  const loadingTimer = loadingLabel
+    ? window.setTimeout(() => {
+        loadingStarted = true;
+        beginLoading(loadingLabel, loadingDetail);
+      }, LOADING_DELAY_MS)
+    : null;
 
   try {
     const response = await fetch(buildUrl(path), {
@@ -184,7 +191,8 @@ async function request(path, options = {}, retryAuth = true) {
     throw normalizeNetworkError(error);
   } finally {
     clearTimeout(timer);
-    endLoading(loadingLabel);
+    if (loadingTimer != null) window.clearTimeout(loadingTimer);
+    if (loadingStarted) endLoading(loadingLabel);
   }
 }
 
