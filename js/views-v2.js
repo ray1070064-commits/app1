@@ -1,7 +1,9 @@
 import { renderView as renderBaseView } from './views.js';
+import { renderNativeLife } from './life.js';
 import { renderAdvancedTrading } from './trading.js';
 
 export function renderView(state) {
   if (state?.ui?.activeView === 'trading') return renderAdvancedTrading(state);
+  if (state?.ui?.activeView === 'life') return renderNativeLife(state);
   return renderBaseView(state);
 }
