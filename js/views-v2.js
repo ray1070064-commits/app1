@@ -4,6 +4,7 @@ import { renderNativeNews, renderNativeProgress } from './content.js';
 import { renderFamilySections } from './family.js';
 import { renderNativeLife } from './life.js';
 import { renderNativePower } from './power.js';
+import { renderNativeSave } from './save.js';
 import { renderNativeSettlement } from './settlement.js';
 import { renderAdvancedTrading } from './trading.js';
 
@@ -15,5 +16,6 @@ export function renderView(state) {
   if (state?.ui?.activeView === 'politics') return renderNativePower(state);
   if (state?.ui?.activeView === 'news') return renderNativeNews(state);
   if (state?.ui?.activeView === 'progress') return renderNativeProgress(state);
+  if (state?.ui?.activeView === 'save') return renderNativeSave(state);
   return renderBaseView(state);
 }
