@@ -23,7 +23,7 @@ import {
   setStartup,
   subscribe,
 } from './state.js';
-import { renderView } from './views.js';
+import { renderView } from './views-v2.js';
 import { collectLegacyInputs, renderLegacyCompatibility } from './legacy.js';
 import { drawMarketChart } from './chart.js';
 import { formatMoney, toast } from './ui.js';
@@ -36,6 +36,17 @@ const connectionLabel = document.getElementById('connection-label');
 function stateFromResponse(payload) {
   if (!payload) return null;
   return payload.state || payload.game_state || payload;
+}
+
+function chartLimitForRange(range) {
+  return ({ '1M': 40, '3M': 110, '1Y': 380, '3Y': 1120, ALL: 2000 })[range] || 380;
+}
+
+function optionalPositiveNumber(id) {
+  const raw = String(document.getElementById(id)?.value ?? '').trim();
+  if (!raw) return null;
+  const value = Number(raw);
+  return Number.isFinite(value) && value > 0 ? value : NaN;
 }
 
 function renderChrome(state) {
@@ -63,7 +74,7 @@ function render() {
     viewRoot.innerHTML = renderLegacyCompatibility(state.ui.legacy, state.connected);
   } else {
     viewRoot.innerHTML = renderView(state);
-    if (state.ui.activeView === 'trading') drawMarketChart(state.ui.chart);
+    if (state.ui.activeView === 'trading') drawMarketChart(state.ui.chart, state.ui);
   }
 }
 
@@ -84,7 +95,8 @@ async function refreshLegacy() {
 async function refreshChart(symbol) {
   if (!getState().connected || !symbol) return;
   try {
-    setChart(await loadChart(symbol, 365));
+    const limit = chartLimitForRange(getState().ui.chartRange);
+    setChart(await loadChart(symbol, limit));
   } catch (error) {
     setChart(null);
     toast(error?.message || '無法讀取圖表資料', 'error');
@@ -159,6 +171,15 @@ document.addEventListener('input', event => {
   if (output) output.textContent = slider.value;
 });
 
+document.addEventListener('change', event => {
+  const trading = event.target.closest('[data-trading-ui]');
+  if (!trading) return;
+  const key = trading.dataset.tradingUi;
+  let value = trading.value;
+  if (key === 'leverage') value = Math.max(1, Number(value) || 1);
+  patchUI({ [key]: value });
+});
+
 document.addEventListener('click', async event => {
   const nav = event.target.closest('.nav-button[data-view]');
   if (nav) {
@@ -183,9 +204,136 @@ document.addEventListener('click', async event => {
     return;
   }
 
-  const watchItem = event.target.closest('[data-symbol]');
+  const watchItem = event.target.closest('.watch-item[data-symbol]');
   if (watchItem) {
     await selectSymbol(watchItem.dataset.symbol);
+    return;
+  }
+
+  const chartRange = event.target.closest('[data-chart-range]');
+  if (chartRange) {
+    patchUI({ chartRange: chartRange.dataset.chartRange || '1Y' });
+    const symbol = getState().ui.selectedSymbol || getState().server?.market?.selected_symbol;
+    if (symbol) await refreshChart(symbol);
+    return;
+  }
+
+  const indicatorButton = event.target.closest('[data-chart-indicator]');
+  if (indicatorButton) {
+    const key = indicatorButton.dataset.chartIndicator;
+    const indicators = { ...(getState().ui.indicators || {}) };
+    indicators[key] = !indicators[key];
+    patchUI({ indicators });
+    return;
+  }
+
+  const advancedTrade = event.target.closest('[data-advanced-trade]');
+  if (advancedTrade) {
+    const symbol = getState().ui.selectedSymbol || getState().server?.market?.selected_symbol;
+    const side = document.getElementById('order-action')?.value || 'open';
+    const positionSide = document.getElementById('position-side')?.value || 'SPOT';
+    const orderType = document.getElementById('order-type')?.value || 'market';
+    const quantity = Number(document.getElementById('order-quantity')?.value || 0);
+    const leverage = Math.max(1, Math.floor(Number(document.getElementById('order-leverage')?.value || 1)));
+    const limitPrice = optionalPositiveNumber('order-limit-price');
+
+    if (!symbol || !Number.isFinite(quantity) || quantity <= 0) {
+      toast('請選擇標的並輸入有效數量。', 'error');
+      return;
+    }
+    if (orderType === 'limit' && !Number.isFinite(limitPrice)) {
+      toast('限價單必須輸入有效限價。', 'error');
+      return;
+    }
+
+    const payload = {
+      symbol,
+      side,
+      position_side: positionSide,
+      order_type: orderType,
+      quantity,
+      leverage,
+    };
+    if (orderType === 'limit') payload.limit_price = limitPrice;
+    await execute('trade', payload);
+    return;
+  }
+
+  const closePosition = event.target.closest('[data-close-position]');
+  if (closePosition) {
+    const input = document.getElementById(closePosition.dataset.closeInput || '');
+    const quantity = Number(input?.value || 0);
+    if (!Number.isFinite(quantity) || quantity <= 0) {
+      toast('請輸入有效的平倉數量。', 'error');
+      return;
+    }
+    await execute('trade', {
+      symbol: closePosition.dataset.symbol,
+      side: 'close',
+      position_side: closePosition.dataset.positionSide,
+      order_type: 'market',
+      quantity,
+    });
+    return;
+  }
+
+  const closeAll = event.target.closest('[data-close-all]');
+  if (closeAll) {
+    const quantity = Number(closeAll.dataset.quantity || 0);
+    await execute('trade', {
+      symbol: closeAll.dataset.symbol,
+      side: 'close',
+      position_side: closeAll.dataset.positionSide,
+      order_type: 'market',
+      quantity,
+    });
+    return;
+  }
+
+  const cancelLimit = event.target.closest('[data-cancel-limit]');
+  if (cancelLimit) {
+    await execute('cancel_limit_order', { order_id: cancelLimit.dataset.cancelLimit });
+    return;
+  }
+
+  const setProtective = event.target.closest('[data-set-protective]');
+  if (setProtective) {
+    const symbol = getState().ui.selectedSymbol || getState().server?.market?.selected_symbol;
+    const positionSide = document.getElementById('protective-side')?.value || 'SPOT';
+    const stopLoss = optionalPositiveNumber('protective-stop');
+    const takeProfit = optionalPositiveNumber('protective-take');
+    const trailingPct = optionalPositiveNumber('protective-trailing');
+    if ([stopLoss, takeProfit, trailingPct].some(Number.isNaN)) {
+      toast('保護單欄位必須是正數。', 'error');
+      return;
+    }
+    if (stopLoss == null && takeProfit == null && trailingPct == null) {
+      toast('至少輸入停損、停利或移動停損其中一項。', 'error');
+      return;
+    }
+    if (trailingPct != null && trailingPct >= 1) {
+      toast('移動停損比例必須小於 1，例如 0.05 代表 5%。', 'error');
+      return;
+    }
+    await execute('set_protective_order', {
+      symbol,
+      position_side: positionSide,
+      stop_loss: stopLoss,
+      take_profit: takeProfit,
+      trailing_pct: trailingPct,
+    });
+    return;
+  }
+
+  const clearProtective = event.target.closest('[data-clear-protective]');
+  if (clearProtective) {
+    await execute('set_protective_order', {
+      symbol: clearProtective.dataset.symbol,
+      position_side: clearProtective.dataset.positionSide,
+      stop_loss: null,
+      take_profit: null,
+      trailing_pct: null,
+    });
     return;
   }
 
@@ -244,22 +392,6 @@ document.addEventListener('click', async event => {
     await execute('advance_time', { days: Number(actionButton.dataset.days || 1), life_policy: 'safe' });
     const symbol = getState().ui.selectedSymbol || getState().server?.market?.selected_symbol;
     if (symbol) await refreshChart(symbol);
-    return;
-  }
-
-  if (action === 'trade') {
-    const server = getState().server || {};
-    const firstSymbol = server.market?.watchlist?.[0]?.symbol || server.market?.selected_symbol || null;
-    const symbol = getState().ui.selectedSymbol || firstSymbol;
-    const side = document.getElementById('order-side')?.value || 'buy';
-    const quantity = Number(document.getElementById('order-quantity')?.value || 0);
-
-    if (!symbol || !Number.isFinite(quantity) || quantity <= 0) {
-      toast('請選擇標的並輸入有效數量。', 'error');
-      return;
-    }
-
-    await execute('trade', { symbol, side, position_side: 'SPOT', quantity });
     return;
   }
 
