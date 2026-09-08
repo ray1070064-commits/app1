@@ -3,6 +3,7 @@ import { CONFIG, hasBackendConfig } from './config.js';
 const SESSION_KEY = 'capital-life-api-session-v1';
 let sessionToken = sessionStorage.getItem(SESSION_KEY) || '';
 let sessionPromise = null;
+let loadingDepth = 0;
 
 export class ApiError extends Error {
   constructor(message, status = 0, payload = null) {
@@ -39,6 +40,70 @@ function normalizeNetworkError(error) {
   return error;
 }
 
+function beginLoading(title, detail = '') {
+  if (!title) return;
+  loadingDepth += 1;
+  const root = document.getElementById('global-loading');
+  if (!root) return;
+  const titleNode = document.getElementById('global-loading-title');
+  const detailNode = document.getElementById('global-loading-detail');
+  if (titleNode) titleNode.textContent = title;
+  if (detailNode) detailNode.textContent = detail || '遊戲核心正在運算，請稍候。';
+  root.classList.add('is-visible');
+  root.setAttribute('aria-hidden', 'false');
+}
+
+function endLoading(title) {
+  if (!title) return;
+  loadingDepth = Math.max(0, loadingDepth - 1);
+  if (loadingDepth > 0) return;
+  const root = document.getElementById('global-loading');
+  if (!root) return;
+  root.classList.remove('is-visible');
+  root.setAttribute('aria-hidden', 'true');
+}
+
+function advanceTimeout(days) {
+  if (days >= 365) return 300000;
+  if (days >= 180) return 180000;
+  if (days >= 30) return 120000;
+  if (days >= 7) return 90000;
+  return 60000;
+}
+
+function actionRequestMeta(action, payload = {}, options = {}) {
+  if (Number.isFinite(Number(options.timeoutMs)) && Number(options.timeoutMs) > 0) {
+    return {
+      timeoutMs: Number(options.timeoutMs),
+      loadingLabel: String(options.loadingLabel || ''),
+      loadingDetail: String(options.loadingDetail || ''),
+    };
+  }
+
+  if (action === 'advance_time') {
+    const days = Math.max(1, Number(payload.days || 1));
+    const label = days >= 365 ? '正在推進 1 年…' : days >= 180 ? '正在推進半年…' : `正在推進 ${days} 天…`;
+    return {
+      timeoutMs: advanceTimeout(days),
+      loadingLabel: label,
+      loadingDetail: '市場、人生、家庭與公司系統正在逐日運算，請不要關閉頁面。',
+    };
+  }
+  if (action === 'new_game') {
+    return { timeoutMs: 120000, loadingLabel: '正在建立新人生…', loadingDetail: '正在生成市場、角色與初始世界狀態。' };
+  }
+  if (action === 'trade') {
+    return { timeoutMs: 60000, loadingLabel: '正在送出委託…', loadingDetail: '後端正在驗證價格、資金與持倉。' };
+  }
+  if (action.startsWith('company_') || action.startsWith('life_') || action.startsWith('family_') || action.startsWith('politics_') || action.startsWith('underworld_') || action.startsWith('insider_')) {
+    return { timeoutMs: 60000, loadingLabel: '正在處理決策…', loadingDetail: '遊戲核心正在計算這次選擇的結果。' };
+  }
+  if (action.startsWith('settlement_')) {
+    return { timeoutMs: 90000, loadingLabel: '正在處理結算…', loadingDetail: '正在整理最終資產與人生評級。' };
+  }
+  return { timeoutMs: CONFIG.REQUEST_TIMEOUT_MS, loadingLabel: '', loadingDetail: '' };
+}
+
 export function clearSession() {
   sessionToken = '';
   sessionStorage.removeItem(SESSION_KEY);
@@ -51,9 +116,6 @@ export async function ensureSession(force = false) {
 
   sessionPromise = (async () => {
     try {
-      // Session creation deliberately uses a simple cross-origin POST: no JSON body,
-      // no Content-Type header and no third-party cookies. The returned opaque token
-      // is used as Bearer auth for all subsequent API requests.
       const response = await fetch(buildUrl('/session'), {
         method: 'POST',
         credentials: 'omit',
@@ -84,18 +146,25 @@ async function request(path, options = {}, retryAuth = true) {
   if (!hasBackendConfig()) throw new ApiError('尚未設定遊戲後端。');
   if (path !== '/session') await ensureSession(false);
 
+  const {
+    timeoutMs = CONFIG.REQUEST_TIMEOUT_MS,
+    loadingLabel = '',
+    loadingDetail = '',
+    ...fetchOptions
+  } = options;
+
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), CONFIG.REQUEST_TIMEOUT_MS);
+  const timer = setTimeout(() => controller.abort(), Math.max(1000, Number(timeoutMs) || CONFIG.REQUEST_TIMEOUT_MS));
+  beginLoading(loadingLabel, loadingDetail);
 
   try {
     const response = await fetch(buildUrl(path), {
-      // Authentication is Bearer-token based; avoid third-party cookies entirely.
       credentials: 'omit',
       cache: 'no-store',
-      ...options,
+      ...fetchOptions,
       headers: authHeaders({
-        ...(options.body != null ? { 'Content-Type': 'application/json' } : {}),
-        ...(options.headers || {}),
+        ...(fetchOptions.body != null ? { 'Content-Type': 'application/json' } : {}),
+        ...(fetchOptions.headers || {}),
       }),
       signal: controller.signal,
     });
@@ -115,6 +184,7 @@ async function request(path, options = {}, retryAuth = true) {
     throw normalizeNetworkError(error);
   } finally {
     clearTimeout(timer);
+    endLoading(loadingLabel);
   }
 }
 
@@ -131,12 +201,15 @@ export async function loadSettlementPanel() { return request('/settlement', { me
 export async function loadSaveTools() { return request('/save-tools', { method: 'GET' }); }
 
 export async function exportLegacySave() {
-  return request('/legacy-save/export', { method: 'POST' });
+  return request('/legacy-save/export', { method: 'POST', loadingLabel: '正在匯出舊版存檔…' });
 }
 
 export async function importLegacySave({ saveCode = null, fileBase64 = null } = {}) {
   return request('/legacy-save/import', {
     method: 'POST',
+    timeoutMs: 90000,
+    loadingLabel: '正在匯入舊版存檔…',
+    loadingDetail: '後端正在解析並轉換舊版本資料。',
     body: JSON.stringify({
       save_code: saveCode == null ? null : String(saveCode),
       file_base64: fileBase64 == null ? null : String(fileBase64),
@@ -155,8 +228,12 @@ export async function loadChart(symbol, limit = 365) {
 }
 
 export async function sendGameAction(action, payload = {}, options = {}) {
+  const meta = actionRequestMeta(action, payload, options);
   return request('/action', {
     method: 'POST',
+    timeoutMs: meta.timeoutMs,
+    loadingLabel: meta.loadingLabel,
+    loadingDetail: meta.loadingDetail,
     body: JSON.stringify({
       action,
       payload,
@@ -166,21 +243,26 @@ export async function sendGameAction(action, payload = {}, options = {}) {
   });
 }
 
-export async function exportEncryptedBrowserSave() { return request('/browser-save/export', { method: 'POST' }); }
+export async function exportEncryptedBrowserSave() {
+  return request('/browser-save/export', { method: 'POST', loadingLabel: '正在加密儲存…' });
+}
 
 export async function importEncryptedBrowserSave(saveCode) {
   return request('/browser-save/import', {
     method: 'POST',
+    timeoutMs: 90000,
+    loadingLabel: '正在載入存檔…',
+    loadingDetail: '正在驗證並恢復這台瀏覽器的加密進度。',
     body: JSON.stringify({ save_code: String(saveCode || '') }),
   });
 }
 
 export async function saveGame(slot = 'default') {
-  return request('/save', { method: 'POST', body: JSON.stringify({ slot }) });
+  return request('/save', { method: 'POST', loadingLabel: '正在儲存…', body: JSON.stringify({ slot }) });
 }
 
 export async function loadSave(slot = 'default') {
-  return request(`/save/${encodeURIComponent(slot)}`, { method: 'GET' });
+  return request(`/save/${encodeURIComponent(slot)}`, { method: 'GET', loadingLabel: '正在載入存檔…' });
 }
 
 export async function healthCheck() {
