@@ -17,6 +17,7 @@ const initialState = {
     chart: null,
     startup: null,
     lifePanel: null,
+    familyPanel: null,
   },
   server: null,
   connected: false,
@@ -58,6 +59,11 @@ export function setStartup(payload) {
 
 export function setLifePanel(payload) {
   state.ui.lifePanel = payload || null;
+  emit();
+}
+
+export function setFamilyPanel(payload) {
+  state.ui.familyPanel = payload || null;
   emit();
 }
 
