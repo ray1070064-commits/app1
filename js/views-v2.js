@@ -1,5 +1,6 @@
 import { renderView as renderBaseView } from './views.js';
 import { renderNativeCompany } from './company.js';
+import { renderNativeNews, renderNativeProgress } from './content.js';
 import { renderFamilySections } from './family.js';
 import { renderNativeLife } from './life.js';
 import { renderNativePower } from './power.js';
@@ -10,5 +11,7 @@ export function renderView(state) {
   if (state?.ui?.activeView === 'life') return `${renderNativeLife(state)}${renderFamilySections(state)}`;
   if (state?.ui?.activeView === 'company') return renderNativeCompany(state);
   if (state?.ui?.activeView === 'politics') return renderNativePower(state);
+  if (state?.ui?.activeView === 'news') return renderNativeNews(state);
+  if (state?.ui?.activeView === 'progress') return renderNativeProgress(state);
   return renderBaseView(state);
 }
