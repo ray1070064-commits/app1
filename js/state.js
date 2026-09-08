@@ -8,6 +8,9 @@ const initialState = {
       ma50: false,
       ma200: false,
     },
+    marketSearch: '',
+    marketCategory: '全部',
+    marketHeldOnly: false,
     orderAction: 'open',
     positionSide: 'SPOT',
     orderType: 'market',
@@ -16,6 +19,7 @@ const initialState = {
     legacy: null,
     chart: null,
     startup: null,
+    marketPanel: null,
     lifePanel: null,
     familyPanel: null,
     companyPanel: null,
@@ -58,6 +62,11 @@ export function setServerState(serverState) {
 
 export function setStartup(payload) {
   state.ui.startup = payload || null;
+  emit();
+}
+
+export function setMarketPanel(payload) {
+  state.ui.marketPanel = payload || null;
   emit();
 }
 
