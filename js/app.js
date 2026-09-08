@@ -5,6 +5,7 @@ import {
   loadChart,
   loadGameState,
   loadLegacyUi,
+  loadLifePanel,
   loadStartupConfig,
   sendGameAction,
 } from './api.js';
@@ -19,6 +20,7 @@ import {
   setChart,
   setConnected,
   setLegacyUi,
+  setLifePanel,
   setServerState,
   setStartup,
   subscribe,
@@ -92,6 +94,16 @@ async function refreshLegacy() {
   }
 }
 
+async function refreshLife() {
+  if (!getState().connected || !getState().server?.world?.game_started) return;
+  try {
+    const payload = await loadLifePanel();
+    setLifePanel(payload?.life_panel || null);
+  } catch (error) {
+    toast(error?.message || '無法載入人生中心資料', 'error');
+  }
+}
+
 async function refreshChart(symbol) {
   if (!getState().connected || !symbol) return;
   try {
@@ -121,6 +133,12 @@ async function execute(action, payload = {}, options = {}) {
     toast(error?.message || '操作失敗', 'error');
     return null;
   }
+}
+
+async function executeLife(action, payload = {}) {
+  const response = await execute(action, payload);
+  if (response) await refreshLife();
+  return response;
 }
 
 async function executeSave(load = false) {
@@ -185,6 +203,7 @@ document.addEventListener('click', async event => {
   if (nav) {
     patchUI({ activeView: nav.dataset.view });
     if (nav.dataset.view === 'full') await refreshLegacy();
+    if (nav.dataset.view === 'life') await refreshLife();
     return;
   }
 
@@ -227,6 +246,56 @@ document.addEventListener('click', async event => {
     return;
   }
 
+  const lifeSkill = event.target.closest('[data-life-skill]');
+  if (lifeSkill) {
+    await executeLife('life_start_skill_training', { skill: lifeSkill.dataset.lifeSkill });
+    return;
+  }
+
+  const lifeApply = event.target.closest('[data-life-apply-job]');
+  if (lifeApply) {
+    await executeLife('life_apply_job', { job_key: lifeApply.dataset.jobKey, employer: lifeApply.dataset.employer });
+    return;
+  }
+
+  if (event.target.closest('[data-life-promotion]')) {
+    await executeLife('life_apply_promotion');
+    return;
+  }
+
+  if (event.target.closest('[data-life-resign]')) {
+    await executeLife('life_resign_job');
+    return;
+  }
+
+  const lifeHealth = event.target.closest('[data-life-health]');
+  if (lifeHealth) {
+    await executeLife('life_health_action', { kind: lifeHealth.dataset.lifeHealth });
+    return;
+  }
+
+  if (event.target.closest('[data-life-settings]')) {
+    await executeLife('life_update_settings', {
+      auto_medical: Boolean(document.getElementById('life-auto-medical')?.checked),
+      auto_health_threshold: Number(document.getElementById('life-health-threshold')?.value || 28),
+      auto_stress_threshold: Number(document.getElementById('life-stress-threshold')?.value || 88),
+      daily_living_cost: Number(document.getElementById('life-living-cost')?.value || 50),
+    });
+    return;
+  }
+
+  const lifeChoice = event.target.closest('[data-life-event-choice]');
+  if (lifeChoice) {
+    await executeLife('resolve_life_event', { choice: Number(lifeChoice.dataset.lifeEventChoice) });
+    return;
+  }
+
+  if (event.target.closest('[data-life-retire]')) {
+    const route = String(document.getElementById('life-retirement-route')?.value || '');
+    await executeLife('life_retire', { route });
+    return;
+  }
+
   const advancedTrade = event.target.closest('[data-advanced-trade]');
   if (advancedTrade) {
     const symbol = getState().ui.selectedSymbol || getState().server?.market?.selected_symbol;
@@ -246,14 +315,7 @@ document.addEventListener('click', async event => {
       return;
     }
 
-    const payload = {
-      symbol,
-      side,
-      position_side: positionSide,
-      order_type: orderType,
-      quantity,
-      leverage,
-    };
+    const payload = { symbol, side, position_side: positionSide, order_type: orderType, quantity, leverage };
     if (orderType === 'limit') payload.limit_price = limitPrice;
     await execute('trade', payload);
     return;
@@ -267,26 +329,14 @@ document.addEventListener('click', async event => {
       toast('請輸入有效的平倉數量。', 'error');
       return;
     }
-    await execute('trade', {
-      symbol: closePosition.dataset.symbol,
-      side: 'close',
-      position_side: closePosition.dataset.positionSide,
-      order_type: 'market',
-      quantity,
-    });
+    await execute('trade', { symbol: closePosition.dataset.symbol, side: 'close', position_side: closePosition.dataset.positionSide, order_type: 'market', quantity });
     return;
   }
 
   const closeAll = event.target.closest('[data-close-all]');
   if (closeAll) {
     const quantity = Number(closeAll.dataset.quantity || 0);
-    await execute('trade', {
-      symbol: closeAll.dataset.symbol,
-      side: 'close',
-      position_side: closeAll.dataset.positionSide,
-      order_type: 'market',
-      quantity,
-    });
+    await execute('trade', { symbol: closeAll.dataset.symbol, side: 'close', position_side: closeAll.dataset.positionSide, order_type: 'market', quantity });
     return;
   }
 
@@ -315,25 +365,13 @@ document.addEventListener('click', async event => {
       toast('移動停損比例必須小於 1，例如 0.05 代表 5%。', 'error');
       return;
     }
-    await execute('set_protective_order', {
-      symbol,
-      position_side: positionSide,
-      stop_loss: stopLoss,
-      take_profit: takeProfit,
-      trailing_pct: trailingPct,
-    });
+    await execute('set_protective_order', { symbol, position_side: positionSide, stop_loss: stopLoss, take_profit: takeProfit, trailing_pct: trailingPct });
     return;
   }
 
   const clearProtective = event.target.closest('[data-clear-protective]');
   if (clearProtective) {
-    await execute('set_protective_order', {
-      symbol: clearProtective.dataset.symbol,
-      position_side: clearProtective.dataset.positionSide,
-      stop_loss: null,
-      take_profit: null,
-      trailing_pct: null,
-    });
+    await execute('set_protective_order', { symbol: clearProtective.dataset.symbol, position_side: clearProtective.dataset.positionSide, stop_loss: null, take_profit: null, trailing_pct: null });
     return;
   }
 
@@ -347,7 +385,6 @@ document.addEventListener('click', async event => {
 
   const actionButton = event.target.closest('[data-game-action]');
   if (!actionButton) return;
-
   const action = actionButton.dataset.gameAction;
 
   if (action === 'new_game') {
@@ -372,13 +409,7 @@ document.addEventListener('click', async event => {
       return;
     }
 
-    const response = await execute('new_game', {
-      init_balance: initBalance,
-      job_key: jobKey,
-      start_age: startAge,
-      world_seed: worldSeed,
-      tutorial_enabled: tutorialEnabled,
-    });
+    const response = await execute('new_game', { init_balance: initBalance, job_key: jobKey, start_age: startAge, world_seed: worldSeed, tutorial_enabled: tutorialEnabled });
     if (response) {
       const nextState = stateFromResponse(response);
       const symbol = nextState?.market?.selected_symbol || nextState?.market?.watchlist?.[0]?.symbol;
@@ -392,6 +423,7 @@ document.addEventListener('click', async event => {
     await execute('advance_time', { days: Number(actionButton.dataset.days || 1), life_policy: 'safe' });
     const symbol = getState().ui.selectedSymbol || getState().server?.market?.selected_symbol;
     if (symbol) await refreshChart(symbol);
+    if (getState().ui.activeView === 'life') await refreshLife();
     return;
   }
 
