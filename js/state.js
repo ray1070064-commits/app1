@@ -16,6 +16,7 @@ const initialState = {
     legacy: null,
     chart: null,
     startup: null,
+    lifePanel: null,
   },
   server: null,
   connected: false,
@@ -52,6 +53,11 @@ export function setServerState(serverState) {
 
 export function setStartup(payload) {
   state.ui.startup = payload || null;
+  emit();
+}
+
+export function setLifePanel(payload) {
+  state.ui.lifePanel = payload || null;
   emit();
 }
 
