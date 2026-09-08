@@ -3,12 +3,14 @@ import { renderNativeCompany } from './company.js';
 import { renderNativeNews, renderNativeProgress } from './content.js';
 import { renderFamilySections } from './family.js';
 import { renderNativeLife } from './life.js';
+import { renderLaunchScreen } from './launch.js';
 import { renderNativePower } from './power.js';
 import { renderNativeSave } from './save.js';
 import { renderNativeSettlement } from './settlement.js';
 import { renderAdvancedTrading } from './trading.js';
 
 export function renderView(state) {
+  if (state?.ui?.activeView === 'start') return renderLaunchScreen(state);
   if (state?.ui?.activeView === 'settlement') return renderNativeSettlement(state);
   if (state?.ui?.activeView === 'trading') return renderAdvancedTrading(state);
   if (state?.ui?.activeView === 'life') return `${renderNativeLife(state)}${renderFamilySections(state)}`;
