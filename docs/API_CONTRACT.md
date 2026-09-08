@@ -13,7 +13,7 @@
 5. world seed、事件機率、effect multiplier、隱藏門檻與 RNG 資訊不得出現在 public state。
 6. GitHub Pages 與 API 是 cross-site；後端會設 HttpOnly Cookie，並同時提供 opaque session token 作為第三方 Cookie 被阻擋時的 fallback。
 7. opaque session token 只是玩家 Session 識別，不是 API secret，也不能包含遊戲規則。
-8. 公開 API 可以回傳舊 UI 本來就會顯示的玩家資訊與門檻，但不得回傳內部 RNG 狀態、候選人 chemistry、職涯 entry/promotion chance、伴侶 income range、董事會通過機率或未公開公司事件效果等隱藏資料。
+8. 公開 API 可以回傳舊 UI 本來就會顯示的玩家資訊與門檻，但不得回傳內部 RNG 狀態、候選人 chemistry、職涯 entry/promotion chance、伴侶 income range、董事會通過機率、政治倡議成功率、地下曝光率、定罪機率或未公開事件效果等隱藏資料。
 
 ## Health
 
@@ -168,6 +168,41 @@ Authorization: Bearer <session_token>
 
 公司每日營運、薪資結構、折舊、研發攤銷、營收、稅、估值、董事會判定、公司被動事件、季結與股利實際發放仍由私有 Python core 執行；前端只提交操作參數並呈現後端結果。
 
+## 原生政治／法律／地下勢力面板
+
+`GET /api/game/power`
+
+此 endpoint 給「政治法律」原生 Web 控制中心使用，包含四類**可公開狀態**：政治、地下勢力、非公開消息與法律案件。
+
+可回傳的資料包括：
+
+- 政治等級、影響力、信任、累計公開投入、政府風格名稱與文字說明
+- 政治訓練的公開成本／天數、政治倡議與市場關說冷卻
+- 地下勢力等級、地下資金、週期收入區間、已發生的地下帳本與操作冷卻
+- 已解鎖非公開消息管道的成本、消息品質、冷卻與可選市場標的
+- 玩家購買後已取得的消息方向／品質／有效期限
+- 已建立但尚未結算的內線部位摘要
+- 法律熱度、服刑天數、前科、案件階段、證據強度、已記錄罪名與已完成的判決紀錄
+
+**不得回傳政治倡議 `success_prob`、地下政治 `exposure_prob`、案件 `conviction_prob`、政治資金 `money_scale/funding_strength`、政府量刑 `mult_range`、政府事件權重、world seed 或任何 RNG state。**
+
+玩家已經取得的消息品質，以及判決完成後實際發生的結果可以顯示；這些屬於已揭露／已實現結果，不是尚未執行的隱藏規則。
+
+目前相關 semantic actions：
+
+- `politics_start_training`
+- `politics_campaign`
+- `politics_lobby`
+- `underworld_start_training`
+- `underworld_set_paused`
+- `underworld_smear`
+- `underworld_black_politics`
+- `underworld_convert_dirty_money`
+- `insider_purchase`
+- `insider_open_position`
+
+政治倡議成敗、地下曝光、資金處理是否遭查獲、內線消息生成、案件推進、定罪、罰金、量刑與服刑日數更新仍全部由私有 Python core 執行；前端不能自行模擬或指定結果。
+
 ## 圖表資料
 
 `GET /api/game/chart/{symbol}?limit=365`
@@ -218,8 +253,11 @@ Authorization: Bearer <session_token>
 - `life_*`
 - `family_*`
 - `company_*`
+- `politics_*`
+- `underworld_*`
+- `insider_*`
 
-後端必須自行驗證所有輸入，不可信任前端提供的價格、現金、持股、事件結果、候選人資料、教育結果、公司估值、董事會結果、IPO 價格或解鎖狀態。
+後端必須自行驗證所有輸入，不可信任前端提供的價格、現金、持股、事件結果、候選人資料、教育結果、公司估值、董事會結果、IPO 價格、政治成功結果、法律案件結果或解鎖狀態。
 
 ## 完整功能相容模式
 
