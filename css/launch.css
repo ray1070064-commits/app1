@@ -326,10 +326,24 @@ body.launch-mode .view-root {
   line-height: 1.55;
 }
 .launch-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
   color: rgba(148,163,184,.42);
   font-size: 9px;
   letter-spacing: .18em;
   text-align: center;
+}
+.launch-about-link {
+  color: rgba(125,211,252,.62);
+  text-decoration: none;
+  letter-spacing: .08em;
+}
+.launch-about-link:hover {
+  color: #7dd3fc;
+  text-decoration: underline;
 }
 
 @media (max-width: 980px) {
