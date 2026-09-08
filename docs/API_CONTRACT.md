@@ -13,6 +13,7 @@
 5. world seed、事件機率、effect multiplier、隱藏門檻與 RNG 資訊不得出現在 public state。
 6. GitHub Pages 與 API 是 cross-site；後端會設 HttpOnly Cookie，並同時提供 opaque session token 作為第三方 Cookie 被阻擋時的 fallback。
 7. opaque session token 只是玩家 Session 識別，不是 API secret，也不能包含遊戲規則。
+8. 公開 API 可以回傳舊 UI 本來就會顯示的玩家資訊與門檻，但不得回傳內部 RNG 狀態、候選人 chemistry、職涯 entry/promotion chance、伴侶 income range 等隱藏資料。
 
 ## Health
 
@@ -54,21 +55,10 @@ Authorization: Bearer <session_token>
 ```json
 {
   "state": {
-    "world": {
-      "day": 1,
-      "game_started": true
-    },
-    "player": {
-      "cash": 100000,
-      "net_worth": 100000
-    },
-    "market": {
-      "selected_symbol": "XBTC",
-      "watchlist": []
-    },
-    "portfolio": {
-      "positions": []
-    },
+    "world": { "day": 1, "game_started": true },
+    "player": { "cash": 100000, "net_worth": 100000 },
+    "market": { "selected_symbol": "XBTC", "watchlist": [] },
+    "portfolio": { "positions": [] },
     "life": {},
     "company": {},
     "politics": {},
@@ -78,6 +68,67 @@ Authorization: Bearer <session_token>
 ```
 
 上述欄位只是顯示資料，不代表任何遊戲規則；公開 state **不得包含 `world_seed`、event chance/weight/effects、私有倍率或內部計算資料**。
+
+## 原生人生／職涯面板
+
+`GET /api/game/life`
+
+提供原生 Web 人生中心目前需要顯示的安全資料，例如：
+
+- 目前職位與實際日薪
+- 技能等級與下一級課程成本／天數
+- 可應徵職位、公開資格門檻、雇主與冷卻
+- 升遷公開門檻與冷卻
+- 健康／生活設定
+- 退休進度與可選路線
+
+**不得回傳求職錄取率、升遷 RNG、world seed 或其他隱藏公式。**
+
+目前相關 semantic actions：
+
+- `life_start_skill_training`
+- `life_apply_job`
+- `life_apply_promotion`
+- `life_resign_job`
+- `life_health_action`
+- `life_update_settings`
+- `resolve_life_event`
+- `life_retire`
+
+## 原生家庭／人生資產面板
+
+`GET /api/game/family`
+
+只回傳玩家在家庭頁需要看到的資料，例如：
+
+- 單身時的相遇方式
+- 候選人的姓名、年齡、公開職業／個性描述
+- 交往狀態、親密度、關係值與 1/7/30 天冷卻
+- 已婚家庭的幸福、關係、婚姻天數、家庭收支摘要
+- 子女年齡、教育、學習、自信、親子關係、興趣與教育基金
+- 家庭自動照顧設定
+- 當天動態房產／車輛價格與持有數量
+- 已在舊 UI 顯示的家庭 Buff 摘要與傳承統計
+
+候選人的內部 `chemistry`、伴侶 `income_range`、RNG state 等資料不得出現在這個 endpoint；它們只在後端執行規則時使用。
+
+目前相關 semantic actions：
+
+- `family_find_partner`
+- `family_start_dating`
+- `family_skip_candidate`
+- `family_dating_action`
+- `family_marry`
+- `family_end_dating`
+- `family_add_child`
+- `family_set_child_path`
+- `family_parenting_action`
+- `family_contribute_education`
+- `family_activity`
+- `family_update_automation`
+- `family_trade_asset`
+
+家庭每日收入、伴侶成長／退休、子女成長、成年回饋、長照、里程碑與傳承等持續效果仍由原本 Python simulation/family core 在時間推進時執行；前端不得自行模擬。
 
 ## 圖表資料
 
@@ -117,7 +168,7 @@ Authorization: Bearer <session_token>
 
 `action_id` 用來避免網路重試或連點造成同一行動被執行兩次。
 
-目前高頻 semantic actions 包含：
+主要 semantic actions 包含：
 
 - `new_game`
 - `trade`
@@ -126,8 +177,10 @@ Authorization: Bearer <session_token>
 - `resolve_life_event`
 - `cancel_limit_order`
 - `set_protective_order`
+- `life_*`
+- `family_*`
 
-後端必須自行驗證所有輸入，不可信任前端提供的價格、現金、持股、事件結果或解鎖狀態。
+後端必須自行驗證所有輸入，不可信任前端提供的價格、現金、持股、事件結果、候選人資料、教育結果或解鎖狀態。
 
 ## 完整功能相容模式
 
