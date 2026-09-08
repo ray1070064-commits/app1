@@ -13,7 +13,7 @@
 5. world seed、事件機率、effect multiplier、隱藏門檻與 RNG 資訊不得出現在 public state。
 6. GitHub Pages 與 API 是 cross-site；後端會設 HttpOnly Cookie，並同時提供 opaque session token 作為第三方 Cookie 被阻擋時的 fallback。
 7. opaque session token 只是玩家 Session 識別，不是 API secret，也不能包含遊戲規則。
-8. 公開 API 可以回傳舊 UI 本來就會顯示的玩家資訊與門檻，但不得回傳內部 RNG 狀態、候選人 chemistry、職涯 entry/promotion chance、伴侶 income range 等隱藏資料。
+8. 公開 API 可以回傳舊 UI 本來就會顯示的玩家資訊與門檻，但不得回傳內部 RNG 狀態、候選人 chemistry、職涯 entry/promotion chance、伴侶 income range、董事會通過機率或未公開公司事件效果等隱藏資料。
 
 ## Health
 
@@ -130,6 +130,44 @@ Authorization: Bearer <session_token>
 
 家庭每日收入、伴侶成長／退休、子女成長、成年回饋、長照、里程碑與傳承等持續效果仍由原本 Python simulation/family core 在時間推進時執行；前端不得自行模擬。
 
+## 原生公司經營面板
+
+`GET /api/game/company`
+
+只回傳舊公司介面本來就需要顯示、且玩家可合理知道的公司資料，例如：
+
+- 可創業產業、最低／建議資本與技能門檻
+- 公司名稱、代號、產業、階段、估值、現金、員工、品牌與控制權
+- 每日營收／成本、季度損益與資產負債表摘要
+- 員工上限、平均薪資、產能利用率、研發效果與借款額度
+- 公司事件的標題、說明、截止日與選項文字
+- IPO 公開資格門檻與舊 UI 已顯示的估價結果
+- 上市後 MYCO 股數、玩家持股、股利政策與公開市場資本操作
+
+**不得回傳董事會表決隨機數、公司事件未選擇前的 cash/legal/effect 內部欄位、事件產生機率、營運 profile 常數表或其他只供核心計算使用的資料。**
+
+目前相關 semantic actions：
+
+- `company_create`
+- `company_rename`
+- `company_change_ticker`
+- `company_inject_capital`
+- `company_marketing`
+- `company_hire`
+- `company_fire`
+- `company_borrow`
+- `company_repay`
+- `company_capex`
+- `company_extra_rd`
+- `company_resolve_event`
+- `company_ipo`
+- `company_set_dividend_yield`
+- `company_issue_shares`
+- `company_buyback_shares`
+- `company_bankruptcy_action`
+
+公司每日營運、薪資結構、折舊、研發攤銷、營收、稅、估值、董事會判定、公司被動事件、季結與股利實際發放仍由私有 Python core 執行；前端只提交操作參數並呈現後端結果。
+
 ## 圖表資料
 
 `GET /api/game/chart/{symbol}?limit=365`
@@ -179,8 +217,9 @@ Authorization: Bearer <session_token>
 - `set_protective_order`
 - `life_*`
 - `family_*`
+- `company_*`
 
-後端必須自行驗證所有輸入，不可信任前端提供的價格、現金、持股、事件結果、候選人資料、教育結果或解鎖狀態。
+後端必須自行驗證所有輸入，不可信任前端提供的價格、現金、持股、事件結果、候選人資料、教育結果、公司估值、董事會結果、IPO 價格或解鎖狀態。
 
 ## 完整功能相容模式
 
