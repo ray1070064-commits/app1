@@ -1,0 +1,112 @@
+/* Runtime UI refinements: denser market rows + operation loading state. */
+
+/* Watchlist / market explorer: fit more symbols without changing functionality. */
+.market-scroll { padding: 6px !important; }
+.market-explorer { gap: 5px !important; }
+.watchlist { gap: 2px !important; }
+.watch-line {
+  grid-template-columns: minmax(0, 1fr) 24px !important;
+  gap: 2px !important;
+}
+.watch-line .button.compact {
+  min-width: 24px !important;
+  width: 24px;
+  min-height: 24px !important;
+  padding: 1px !important;
+  font-size: 10px !important;
+}
+.watch-item {
+  min-height: 37px !important;
+  padding: 4px 5px !important;
+  gap: 1px 6px !important;
+  border-radius: 5px !important;
+  line-height: 1.12;
+}
+.watch-symbol {
+  font-size: 10px !important;
+  line-height: 1.05;
+}
+.watch-name {
+  font-size: 8.5px !important;
+  line-height: 1.05;
+}
+.watch-item strong {
+  font-size: 10px !important;
+  line-height: 1.05;
+}
+.watch-item .price-up,
+.watch-item .price-down {
+  font-size: 9px !important;
+  line-height: 1.05;
+}
+.market-section-label {
+  font-size: 8.5px !important;
+  margin-top: 1px !important;
+}
+.market-browser summary {
+  font-size: 9px !important;
+  padding-block: 2px;
+}
+.market-search-results { margin-top: 3px !important; }
+
+/* Global operation loading overlay. */
+.global-loading {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(3, 7, 13, .62);
+  backdrop-filter: blur(5px);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity .16s ease, visibility .16s ease;
+}
+.global-loading.is-visible {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+.global-loading-card {
+  width: min(430px, calc(100vw - 36px));
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  align-items: center;
+  gap: 14px;
+  padding: 17px 18px;
+  border: 1px solid rgba(125, 211, 252, .20);
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(17, 27, 43, .98), rgba(9, 16, 27, .98));
+  box-shadow: 0 24px 80px rgba(0, 0, 0, .42);
+}
+.global-loading-spinner {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 3px solid rgba(148, 163, 184, .16);
+  border-top-color: var(--accent);
+  animation: capital-life-spin .78s linear infinite;
+}
+.global-loading-copy {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+.global-loading-copy strong {
+  font-size: 13px;
+  letter-spacing: .01em;
+}
+.global-loading-copy small {
+  color: var(--muted);
+  font-size: 10.5px;
+  line-height: 1.5;
+}
+@keyframes capital-life-spin { to { transform: rotate(360deg); } }
+
+@media (max-width: 820px) {
+  .watch-item { min-height: 40px !important; }
+  .global-loading-card { grid-template-columns: 36px minmax(0, 1fr); }
+  .global-loading-spinner { width: 30px; height: 30px; }
+}
