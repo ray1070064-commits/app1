@@ -15,6 +15,8 @@ export function renderLaunchScreen(state) {
   const age = config.age || {};
   const jobs = Array.isArray(config.jobs) ? config.jobs : [];
   const ready = Boolean(state.connected && jobs.length);
+  const balanceMin = Number(balance.min ?? 10000);
+  const balanceMax = Number(balance.max ?? 5000000);
 
   return `
     <section class="launch-screen">
@@ -60,10 +62,11 @@ export function renderLaunchScreen(state) {
             <label class="launch-field">
               <span>起始資金</span>
               <input id="start-balance" class="input" type="number"
-                min="${escapeHtml(balance.min ?? 10000)}"
-                max="${escapeHtml(balance.max ?? 5000000)}"
+                min="${escapeHtml(balanceMin)}"
+                max="${escapeHtml(balanceMax)}"
                 step="${escapeHtml(balance.step ?? 10000)}"
                 value="${escapeHtml(balance.default ?? 100000)}" />
+              <small class="launch-range">最小 ${escapeHtml(formatMoney(balanceMin))}　·　最大 ${escapeHtml(formatMoney(balanceMax))}</small>
             </label>
 
             <label class="launch-field">
