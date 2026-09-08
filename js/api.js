@@ -108,6 +108,10 @@ export async function loadStartupConfig() {
   return request('/startup', { method: 'GET' });
 }
 
+export async function loadMarketPanel() {
+  return request('/market', { method: 'GET' });
+}
+
 export async function loadLifePanel() {
   return request('/life', { method: 'GET' });
 }
