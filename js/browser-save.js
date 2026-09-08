@@ -4,6 +4,7 @@ const SAVE_KEY = 'capital-life-encrypted-save-v1';
 const SAVE_META_KEY = 'capital-life-encrypted-save-meta-v1';
 let autosaveTimer = null;
 let autosaveInFlight = null;
+let autosaveEnabled = true;
 
 export function hasEncryptedBrowserSave() {
   return Boolean(localStorage.getItem(SAVE_KEY));
@@ -20,6 +21,18 @@ export function getEncryptedBrowserSaveMeta() {
 export function clearEncryptedBrowserSave() {
   localStorage.removeItem(SAVE_KEY);
   localStorage.removeItem(SAVE_META_KEY);
+}
+
+export function setEncryptedAutosaveEnabled(value) {
+  autosaveEnabled = Boolean(value);
+  if (!autosaveEnabled && autosaveTimer) {
+    window.clearTimeout(autosaveTimer);
+    autosaveTimer = null;
+  }
+}
+
+export function isEncryptedAutosaveEnabled() {
+  return autosaveEnabled;
 }
 
 function storeEncryptedSave(saveCode) {
@@ -53,17 +66,17 @@ export async function restoreEncryptedBrowserSave() {
   try {
     return await importEncryptedBrowserSave(code);
   } catch (error) {
-    // A rejected ciphertext is not useful for future boots. Remove it so the player
-    // can start/recover normally instead of entering a permanent restore loop.
     if (Number(error?.status) === 400) clearEncryptedBrowserSave();
     throw error;
   }
 }
 
 export function scheduleEncryptedAutosave(delayMs = 900) {
+  if (!autosaveEnabled) return;
   if (autosaveTimer) window.clearTimeout(autosaveTimer);
   autosaveTimer = window.setTimeout(async () => {
     autosaveTimer = null;
+    if (!autosaveEnabled) return;
     try {
       await persistEncryptedBrowserSave();
     } catch (error) {
