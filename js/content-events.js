@@ -1,6 +1,6 @@
-import { loadLifePanel, loadNewsPanel, loadProgressPanel, sendGameAction } from './api.js';
+import { loadLifePanel, loadNewsPanel, loadPttPanel, loadProgressPanel, sendGameAction } from './api.js';
 import { scheduleEncryptedAutosave } from './browser-save.js';
-import { getState, patchUI, setLifePanel, setNewsPanel, setProgressPanel, setServerState } from './state.js';
+import { getState, patchUI, setLifePanel, setNewsPanel, setProgressPanel, setPttPanel, setServerState } from './state.js';
 import { toast } from './ui.js';
 
 function stateFromResponse(payload) {
@@ -11,10 +11,21 @@ function stateFromResponse(payload) {
 async function refreshNews() {
   if (!getState().connected || !getState().server?.world?.game_started) return;
   try {
-    const payload = await loadNewsPanel();
-    setNewsPanel(payload?.news_panel || null);
+    const [news, ptt] = await Promise.all([loadNewsPanel(), loadPttPanel()]);
+    setNewsPanel(news?.news_panel || null);
+    setPttPanel(ptt?.ptt_panel || null);
   } catch (error) {
     toast(error?.message || '無法載入新聞／事件資料', 'error');
+  }
+}
+
+async function refreshPtt() {
+  if (!getState().connected || !getState().server?.world?.game_started) return;
+  try {
+    const payload = await loadPttPanel();
+    setPttPanel(payload?.ptt_panel || null);
+  } catch (error) {
+    toast(error?.message || '無法載入 PTT 鄉民牆', 'error');
   }
 }
 
@@ -28,7 +39,7 @@ async function refreshProgress() {
   }
 }
 
-async function executeContent(action, payload = {}) {
+async function executeContent(action, payload = {}, { refresh = true } = {}) {
   if (!getState().connected) {
     toast('後端尚未連線。', 'error');
     return null;
@@ -38,7 +49,7 @@ async function executeContent(action, payload = {}) {
     const state = stateFromResponse(response);
     if (state) setServerState(state);
     if (state?.world?.game_started) scheduleEncryptedAutosave();
-    await refreshProgress();
+    if (refresh) await refreshProgress();
     toast(response?.message || '操作完成', 'success');
     return response;
   } catch (error) {
@@ -53,43 +64,41 @@ async function openLifeAfterTutorial() {
   try {
     const payload = await loadLifePanel();
     setLifePanel(payload?.life_panel || null);
-  } catch {
-    // The tutorial completion is still valid if the secondary panel refresh fails.
-  }
+  } catch {}
   patchUI({ activeView: 'life' });
 }
 
 document.addEventListener('click', async event => {
   const nav = event.target.closest('.nav-button[data-view]');
-  if (nav?.dataset.view === 'news') {
-    await refreshNews();
-    return;
-  }
-  if (nav?.dataset.view === 'progress') {
-    await refreshProgress();
-    return;
-  }
+  if (nav?.dataset.view === 'news') { await refreshNews(); return; }
+  if (nav?.dataset.view === 'progress') { await refreshProgress(); return; }
   if (nav?.dataset.view === 'life') {
     const tutorial = getState().ui.progressPanel?.tutorial;
     if (tutorial?.active && Number(tutorial.step) === 6) await executeContent('tutorial_enter_life');
     return;
   }
 
+  if (event.target.closest('[data-ptt-refresh]')) {
+    const response = await executeContent('ptt_refresh', {}, { refresh: false });
+    if (response) await refreshPtt();
+    return;
+  }
+
   const contentAction = event.target.closest('[data-content-action]');
   if (contentAction) {
     const action = String(contentAction.dataset.contentAction || '');
-    if (action === 'tutorial_enter_life') {
-      await openLifeAfterTutorial();
-      return;
-    }
+    if (action === 'tutorial_enter_life') { await openLifeAfterTutorial(); return; }
     await executeContent(action);
     return;
   }
 
   const title = event.target.closest('[data-title-key]');
-  if (title) {
-    await executeContent('progress_select_title', { key: String(title.dataset.titleKey || '') });
-  }
+  if (title) await executeContent('progress_select_title', { key: String(title.dataset.titleKey || '') });
+});
+
+document.addEventListener('change', event => {
+  const filter = event.target.closest('[data-title-category]');
+  if (filter) patchUI({ titleCategory: String(filter.value || '全部') });
 });
 
 queueMicrotask(() => {
