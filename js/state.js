@@ -1,6 +1,6 @@
 const initialState = {
   ui: {
-    activeView: 'trading',
+    activeView: 'start',
     selectedSymbol: null,
     chartRange: '1M',
     indicators: {
@@ -51,6 +51,8 @@ export function setServerState(serverState) {
   if (serverState?.world?.game_over) {
     state.ui.activeView = 'settlement';
     state.ui.endGameConfirm = false;
+  } else if (serverState?.world?.game_started && state.ui.activeView === 'start') {
+    state.ui.activeView = 'trading';
   }
   emit();
 }
