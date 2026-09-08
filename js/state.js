@@ -20,6 +20,8 @@ const initialState = {
     familyPanel: null,
     companyPanel: null,
     powerPanel: null,
+    newsPanel: null,
+    progressPanel: null,
   },
   server: null,
   connected: false,
@@ -76,6 +78,16 @@ export function setCompanyPanel(payload) {
 
 export function setPowerPanel(payload) {
   state.ui.powerPanel = payload || null;
+  emit();
+}
+
+export function setNewsPanel(payload) {
+  state.ui.newsPanel = payload || null;
+  emit();
+}
+
+export function setProgressPanel(payload) {
+  state.ui.progressPanel = payload || null;
   emit();
 }
 
