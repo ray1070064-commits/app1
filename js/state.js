@@ -28,6 +28,8 @@ const initialState = {
     newsPanel: null,
     progressPanel: null,
     settlementPanel: null,
+    saveTools: null,
+    legacySaveExport: null,
   },
   server: null,
   connected: false,
@@ -108,6 +110,16 @@ export function setProgressPanel(payload) {
 
 export function setSettlementPanel(payload) {
   state.ui.settlementPanel = payload || null;
+  emit();
+}
+
+export function setSaveTools(payload) {
+  state.ui.saveTools = payload || null;
+  emit();
+}
+
+export function setLegacySaveExport(payload) {
+  state.ui.legacySaveExport = payload || null;
   emit();
 }
 
