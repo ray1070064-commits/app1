@@ -16,6 +16,7 @@ const initialState = {
     orderType: 'market',
     leverage: 1,
     orderQuantity: 1,
+    titleCategory: '全部',
     endGameConfirm: false,
     legacy: null,
     chart: null,
@@ -26,6 +27,7 @@ const initialState = {
     companyPanel: null,
     powerPanel: null,
     newsPanel: null,
+    pttPanel: null,
     progressPanel: null,
     settlementPanel: null,
     saveTools: null,
@@ -38,29 +40,14 @@ const initialState = {
 const state = structuredClone(initialState);
 const listeners = new Set();
 
-export function getState() {
-  return state;
-}
-
-export function subscribe(listener) {
-  listeners.add(listener);
-  return () => listeners.delete(listener);
-}
-
-function emit() {
-  for (const listener of listeners) listener(state);
-}
-
-export function patchUI(patch) {
-  Object.assign(state.ui, patch);
-  emit();
-}
+export function getState() { return state; }
+export function subscribe(listener) { listeners.add(listener); return () => listeners.delete(listener); }
+function emit() { for (const listener of listeners) listener(state); }
+export function patchUI(patch) { Object.assign(state.ui, patch); emit(); }
 
 export function setServerState(serverState) {
   state.server = serverState || null;
-  if (!state.ui.selectedSymbol && serverState?.market?.selected_symbol) {
-    state.ui.selectedSymbol = serverState.market.selected_symbol;
-  }
+  if (!state.ui.selectedSymbol && serverState?.market?.selected_symbol) state.ui.selectedSymbol = serverState.market.selected_symbol;
   if (serverState?.world?.game_over) {
     state.ui.activeView = 'settlement';
     state.ui.endGameConfirm = false;
@@ -68,72 +55,18 @@ export function setServerState(serverState) {
   emit();
 }
 
-export function setStartup(payload) {
-  state.ui.startup = payload || null;
-  emit();
-}
-
-export function setMarketPanel(payload) {
-  state.ui.marketPanel = payload || null;
-  emit();
-}
-
-export function setLifePanel(payload) {
-  state.ui.lifePanel = payload || null;
-  emit();
-}
-
-export function setFamilyPanel(payload) {
-  state.ui.familyPanel = payload || null;
-  emit();
-}
-
-export function setCompanyPanel(payload) {
-  state.ui.companyPanel = payload || null;
-  emit();
-}
-
-export function setPowerPanel(payload) {
-  state.ui.powerPanel = payload || null;
-  emit();
-}
-
-export function setNewsPanel(payload) {
-  state.ui.newsPanel = payload || null;
-  emit();
-}
-
-export function setProgressPanel(payload) {
-  state.ui.progressPanel = payload || null;
-  emit();
-}
-
-export function setSettlementPanel(payload) {
-  state.ui.settlementPanel = payload || null;
-  emit();
-}
-
-export function setSaveTools(payload) {
-  state.ui.saveTools = payload || null;
-  emit();
-}
-
-export function setLegacySaveExport(payload) {
-  state.ui.legacySaveExport = payload || null;
-  emit();
-}
-
-export function setLegacyUi(payload) {
-  state.ui.legacy = payload || null;
-  emit();
-}
-
-export function setChart(payload) {
-  state.ui.chart = payload || null;
-  emit();
-}
-
-export function setConnected(value) {
-  state.connected = Boolean(value);
-  emit();
-}
+export function setStartup(payload) { state.ui.startup = payload || null; emit(); }
+export function setMarketPanel(payload) { state.ui.marketPanel = payload || null; emit(); }
+export function setLifePanel(payload) { state.ui.lifePanel = payload || null; emit(); }
+export function setFamilyPanel(payload) { state.ui.familyPanel = payload || null; emit(); }
+export function setCompanyPanel(payload) { state.ui.companyPanel = payload || null; emit(); }
+export function setPowerPanel(payload) { state.ui.powerPanel = payload || null; emit(); }
+export function setNewsPanel(payload) { state.ui.newsPanel = payload || null; emit(); }
+export function setPttPanel(payload) { state.ui.pttPanel = payload || null; emit(); }
+export function setProgressPanel(payload) { state.ui.progressPanel = payload || null; emit(); }
+export function setSettlementPanel(payload) { state.ui.settlementPanel = payload || null; emit(); }
+export function setSaveTools(payload) { state.ui.saveTools = payload || null; emit(); }
+export function setLegacySaveExport(payload) { state.ui.legacySaveExport = payload || null; emit(); }
+export function setLegacyUi(payload) { state.ui.legacy = payload || null; emit(); }
+export function setChart(payload) { state.ui.chart = payload || null; emit(); }
+export function setConnected(value) { state.connected = Boolean(value); emit(); }
