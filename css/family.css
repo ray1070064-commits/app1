@@ -1,0 +1,48 @@
+.family-section-title {
+  margin: 26px 0 12px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+.family-section-title h2 { margin: 0; font-size: 20px; }
+.family-section-title p { margin: 5px 0 0; color: var(--muted); font-size: 13px; }
+.family-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.family-wide { grid-column: 1 / -1; }
+.family-candidate { display: grid; grid-template-columns: minmax(0,1fr) 240px; gap: 16px; align-items: center; }
+.family-candidate h3, .family-child-card h3, .family-asset-card h3 { margin: 0 0 5px; }
+.family-candidate p, .family-asset-card p { margin: 0 0 7px; }
+.family-method-desc { display: grid; gap: 7px; margin-top: 12px; }
+.family-method-desc > div { display: grid; grid-template-columns: 160px 1fr; gap: 10px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 9px; }
+.family-method-desc span { color: var(--muted); font-size: 12px; }
+.family-status-metrics { grid-template-columns: repeat(4, minmax(0,1fr)); }
+.family-action-row, .family-danger-row { margin-top: 12px; }
+.family-buffs { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+.family-buffs span { padding: 6px 9px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); font-size: 12px; background: rgba(255,255,255,.025); }
+.family-child-create { margin: 14px 0 10px; }
+.family-child-list { display: grid; gap: 12px; }
+.family-child-card { padding: 14px; border: 1px solid var(--line); border-radius: 12px; background: rgba(255,255,255,.025); }
+.family-child-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 10px; }
+.family-child-head span { color: var(--muted); font-size: 12px; }
+.family-child-metrics { grid-template-columns: repeat(4, minmax(0,1fr)); margin-bottom: 10px; }
+.family-child-controls { display: grid; gap: 10px; }
+.family-parenting-buttons { grid-template-columns: repeat(4, minmax(0,1fr)); }
+.family-assets-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+.family-assets-grid > div { display: grid; gap: 9px; align-content: start; }
+.family-assets-grid > div > h3 { margin: 0 0 2px; }
+.family-asset-card { display: grid; grid-template-columns: minmax(0,1fr) 180px; gap: 12px; align-items: center; padding: 12px; border: 1px solid var(--line); border-radius: 11px; background: rgba(255,255,255,.025); }
+.family-asset-card span { color: var(--muted); font-size: 12px; }
+.family-panel-loading { margin-top: 12px; }
+
+@media (max-width: 1050px) {
+  .family-grid { grid-template-columns: 1fr; }
+  .family-wide { grid-column: auto; }
+  .family-status-metrics, .family-child-metrics { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .family-assets-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 700px) {
+  .family-candidate, .family-asset-card { grid-template-columns: 1fr; }
+  .family-status-metrics, .family-child-metrics { grid-template-columns: 1fr 1fr; }
+  .family-parenting-buttons { grid-template-columns: 1fr 1fr; }
+  .family-method-desc > div { grid-template-columns: 1fr; }
+  .family-child-head { flex-direction: column; }
+}
