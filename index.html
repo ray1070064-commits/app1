@@ -22,24 +22,13 @@
 <body>
   <div id="app" class="app-shell">
     <header class="topbar">
-      <div class="brand-block">
-        <div class="brand-mark" aria-hidden="true">CL</div>
-        <div>
-          <div class="brand-title">資本人生</div>
-          <div class="brand-subtitle">Capital Life</div>
-        </div>
-      </div>
-
+      <div class="brand-block"><div class="brand-mark" aria-hidden="true">CL</div><div><div class="brand-title">資本人生</div><div class="brand-subtitle">Capital Life</div></div></div>
       <div class="topbar-center" aria-label="遊戲摘要">
         <div class="summary-chip"><span>遊戲日</span><strong id="summary-date">—</strong></div>
         <div class="summary-chip"><span>現金</span><strong id="summary-cash">—</strong></div>
         <div class="summary-chip"><span>總資產</span><strong id="summary-networth">—</strong></div>
       </div>
-
-      <div class="connection-block">
-        <span id="connection-dot" class="connection-dot is-offline"></span>
-        <span id="connection-label">後端未連線</span>
-      </div>
+      <div class="connection-block"><span id="connection-dot" class="connection-dot is-offline"></span><span id="connection-label">後端未連線</span></div>
     </header>
 
     <div class="workspace">
@@ -50,18 +39,13 @@
         <button class="nav-button" data-view="politics">政治法律</button>
         <button class="nav-button" data-view="news">市場新聞</button>
         <button class="nav-button" data-view="progress">生涯進度</button>
-        <button class="nav-button" data-view="full">完整功能</button>
         <div class="sidebar-spacer"></div>
         <button class="nav-button" data-view="save">存檔管理</button>
         <button class="nav-button" data-view="settings">設定</button>
       </aside>
 
       <main class="main-stage">
-        <section id="backend-banner" class="backend-banner is-visible" role="status">
-          <strong>前端已啟動。</strong>
-          <span>遊戲核心由 Private FastAPI Backend 執行；若後端未連線，所有會改變遊戲狀態的操作都會鎖定。</span>
-        </section>
-
+        <section id="backend-banner" class="backend-banner is-visible" role="status"><strong>前端已啟動。</strong><span>遊戲核心由 Private FastAPI Backend 執行；若後端未連線，所有會改變遊戲狀態的操作都會鎖定。</span></section>
         <div id="view-root" class="view-root" aria-live="polite"></div>
       </main>
     </div>
