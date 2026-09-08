@@ -40,12 +40,12 @@ export function renderLaunchScreen(state) {
         <section class="launch-copy">
           <div class="launch-kicker">LIFE × CAPITAL × MARKET</div>
           <h1>在市場累積資本，<br>在人生承擔選擇。</h1>
-          <p>股票是核心，但每一次時間推進都會牽動職涯、家庭、公司與政治世界。你的資產只是結果之一。</p>
+          <p>《資本人生》是一款以股票交易為核心的網頁投資遊戲，結合股票模擬、人生模擬、職涯、家庭、公司經營與 IPO；由 AI 協作製作，但市場結果與遊戲規則都由私有後端運算。</p>
           <div class="launch-features">
-            <span>股票與多空交易</span>
-            <span>職涯與人生事件</span>
-            <span>公司與 IPO</span>
-            <span>家庭與傳承</span>
+            <span>股票模擬與多空交易</span>
+            <span>投資與資產配置</span>
+            <span>職涯與人生模擬</span>
+            <span>公司經營與 IPO</span>
           </div>
         </section>
 
@@ -107,7 +107,10 @@ export function renderLaunchScreen(state) {
         </section>
       </div>
 
-      <footer class="launch-footer">CAPITAL LIFE · PRIVATE GAME CORE · WEB CLIENT</footer>
+      <footer class="launch-footer">
+        <span>CAPITAL LIFE · PRIVATE GAME CORE · WEB CLIENT</span>
+        <a class="launch-about-link" href="./about.html">遊戲介紹</a>
+      </footer>
     </section>
   `;
 }
